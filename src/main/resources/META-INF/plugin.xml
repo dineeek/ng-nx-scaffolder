@@ -6,7 +6,7 @@
         Code generation plugin for Angular and Nx developers.
         Generates feature libraries (with store/facade/form/dialog/routing),
         data-access services, model interfaces, UI components, utility files,
-        standalone components, SignalStores, and Playwright E2E tests.
+        and Playwright E2E tests.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -47,16 +47,6 @@
                     class="com.ngscaffolder.actions.NewUtilLibAction"
                     text="Util Library"
                     description="Generate a util lib with utility file"/>
-
-            <separator text="Standalone Files"/>
-            <action id="NgNxScaffolder.NewComponent"
-                    class="com.ngscaffolder.actions.NewComponentAction"
-                    text="Angular Component"
-                    description="Generate a standalone Angular component"/>
-            <action id="NgNxScaffolder.NewSignalStore"
-                    class="com.ngscaffolder.actions.NewSignalStoreAction"
-                    text="NgRx SignalStore"
-                    description="Generate an NgRx SignalStore with state file"/>
 
             <separator text="E2E Testing"/>
             <action id="NgNxScaffolder.NewPlaywrightTest"

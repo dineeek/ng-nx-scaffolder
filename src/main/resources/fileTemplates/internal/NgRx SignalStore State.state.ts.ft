@@ -1,7 +1,0 @@
-export interface I${NAME_PASCAL}State {
-  isLoading: boolean;
-}
-
-export const INITIAL_STATE: I${NAME_PASCAL}State = {
-  isLoading: false,
-};

@@ -9,40 +9,16 @@ class PluginSettingsConfigurable : BoundConfigurable("Angular/Nx Scaffolder") {
     override fun createPanel(): DialogPanel {
         val settings = PluginSettings.getInstance().state
         return panel {
-            group("Angular Component") {
+            group("Nx Library Defaults") {
                 row("Selector prefix:") {
                     textField()
                         .bindText(settings::selectorPrefix)
                         .comment("e.g. app, sp-feature, ef")
                 }
-                row {
-                    checkBox("Generate .spec.ts")
-                        .bindSelected(settings::generateSpec)
-                }
-                row {
-                    checkBox("Generate .scss")
-                        .bindSelected(settings::generateScss)
-                }
-                row {
-                    checkBox("Generate .html (inline template if unchecked)")
-                        .bindSelected(settings::generateHtml)
-                }
-            }
-            group("NgRx SignalStore") {
-                row {
-                    checkBox("Include rxMethod boilerplate")
-                        .bindSelected(settings::includeRxMethod)
-                }
-            }
-            group("Data-Access Service") {
-                row("Base URL pattern:") {
+                row("Default domain:") {
                     textField()
-                        .bindText(settings::dataAccessBaseUrlPattern)
-                }
-                row("Method suffix:") {
-                    textField()
-                        .bindText(settings::dataAccessMethodSuffix)
-                        .comment("e.g. \$ for Observable suffix convention")
+                        .bindText(settings::nxDefaultDomain)
+                        .comment("e.g. sales, ffu, hub")
                 }
             }
             group("Playwright E2E") {
@@ -54,17 +30,6 @@ class PluginSettingsConfigurable : BoundConfigurable("Angular/Nx Scaffolder") {
                     textField()
                         .bindText(settings::playwrightDomainPrefix)
                         .comment("e.g. SAL, FFU")
-                }
-            }
-            group("Nx Library") {
-                row("Default domain:") {
-                    textField()
-                        .bindText(settings::nxDefaultDomain)
-                }
-                row("Default type:") {
-                    textField()
-                        .bindText(settings::nxDefaultType)
-                        .comment("feature, ui, data-access, util, model")
                 }
             }
         }
