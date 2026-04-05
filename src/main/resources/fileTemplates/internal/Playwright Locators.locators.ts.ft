@@ -1,0 +1,7 @@
+export const ${FEATURE_PASCAL.toUpperCase()}_IDS = {
+  // TODO: add test IDs
+} as const;
+
+export const LOCATORS = {
+  // TODO: add CSS selectors
+} as const;

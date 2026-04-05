@@ -1,0 +1,8 @@
+import { test } from '@playwright/test';
+import { ${TEST_CAMEL} } from '../tests';
+
+test.describe('${FEATURE_PASCAL} @${DOMAIN_PREFIX}', () => {
+  test('${TEST_KEBAB}', async () => {
+    await ${TEST_CAMEL}();
+  });
+});

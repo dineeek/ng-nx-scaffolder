@@ -1,0 +1,15 @@
+import { test } from '@playwright/test';
+
+export async function ${TEST_CAMEL}(): Promise<void> {
+  await test.step('Navigate to feature', async () => {
+    // TODO: implement navigation
+  });
+
+  await test.step('Perform action', async () => {
+    // TODO: implement test actions
+  });
+
+  await test.step('Verify result', async () => {
+    // TODO: implement assertions
+  });
+}

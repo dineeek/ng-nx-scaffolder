@@ -1,0 +1,96 @@
+<templateSet group="Angular/Nx">
+    <template name="rxm"
+              value="rxMethod&lt;$TYPE$&gt;(&#10;  pipe(&#10;    switchMap(($PARAM$) =&gt; {&#10;      $END$&#10;      return EMPTY;&#10;    }),&#10;  ),&#10;)"
+              description="NgRx SignalStore rxMethod"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="TYPE" expression="" defaultValue="&quot;void&quot;" alwaysStopAt="true"/>
+        <variable name="PARAM" expression="" defaultValue="&quot;_&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="sig"
+              value="signal&lt;$TYPE$&gt;($INITIAL$)"
+              description="Angular signal"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="TYPE" expression="" defaultValue="&quot;string&quot;" alwaysStopAt="true"/>
+        <variable name="INITIAL" expression="" defaultValue="&quot;''&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="comp"
+              value="computed(() =&gt; $EXPR$)"
+              description="Angular computed signal"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="EXPR" expression="" defaultValue="&quot;&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="ps"
+              value="patchState(store, { $END$ })"
+              description="NgRx patchState"
+              toReformat="true"
+              toShortenFQNames="false">
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="inj"
+              value="private readonly $NAME$ = inject($SERVICE$);"
+              description="Angular inject()"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="SERVICE" expression="" defaultValue="&quot;Service&quot;" alwaysStopAt="true"/>
+        <variable name="NAME" expression="camelCase(SERVICE)" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="wstate"
+              value="withState&lt;$INTERFACE$&gt;($INITIAL_STATE$)"
+              description="NgRx withState"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="INTERFACE" expression="" defaultValue="&quot;IState&quot;" alwaysStopAt="true"/>
+        <variable name="INITIAL_STATE" expression="" defaultValue="&quot;INITIAL_STATE&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="tstep"
+              value="await test.step('$DESCRIPTION$', async () =&gt; {&#10;  $END$&#10;});"
+              description="Playwright test.step"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="DESCRIPTION" expression="" defaultValue="&quot;Step description&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+
+    <template name="tcase"
+              value="export async function $NAME$($FIXTURES$: Pick&lt;$FIXTURE_TYPE$, '$KEYS$'&gt;): Promise&lt;void&gt; {&#10;  await test.step('$STEP$', async () =&gt; {&#10;    $END$&#10;  });&#10;}"
+              description="Playwright test case function"
+              toReformat="true"
+              toShortenFQNames="false">
+        <variable name="NAME" expression="" defaultValue="&quot;testCase&quot;" alwaysStopAt="true"/>
+        <variable name="FIXTURES" expression="" defaultValue="&quot;fixtures&quot;" alwaysStopAt="false"/>
+        <variable name="FIXTURE_TYPE" expression="" defaultValue="&quot;Fixtures&quot;" alwaysStopAt="true"/>
+        <variable name="KEYS" expression="" defaultValue="&quot;page&quot;" alwaysStopAt="true"/>
+        <variable name="STEP" expression="" defaultValue="&quot;Step description&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="TYPESCRIPT" value="true"/>
+        </context>
+    </template>
+</templateSet>

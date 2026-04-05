@@ -1,0 +1,49 @@
+<idea-plugin>
+    <id>com.ngscaffolder.ng-nx-scaffolder</id>
+    <name>Angular/Nx Scaffolder</name>
+    <vendor url="https://github.com/dineeek/ng-nx-scaffolder">dineeek</vendor>
+    <description><![CDATA[
+        Code generation plugin for Angular and Nx developers.
+        Generates standalone components, SignalStores, data-access services,
+        Playwright E2E tests, and Nx library structures.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>JavaScript</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService
+                serviceImplementation="com.ngscaffolder.settings.PluginSettings"/>
+        <applicationConfigurable
+                instance="com.ngscaffolder.settings.PluginSettingsConfigurable"
+                displayName="Angular/Nx Scaffolder"
+                parentId="tools"/>
+        <defaultLiveTemplates file="/liveTemplates/AngularNx.xml"/>
+    </extensions>
+
+    <actions>
+        <group id="NgNxScaffolder.NewGroup" text="Angular/Nx" popup="true">
+            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
+            <action id="NgNxScaffolder.NewComponent"
+                    class="com.ngscaffolder.actions.NewComponentAction"
+                    text="Angular Component"
+                    description="Generate a standalone Angular component"/>
+            <action id="NgNxScaffolder.NewSignalStore"
+                    class="com.ngscaffolder.actions.NewSignalStoreAction"
+                    text="NgRx SignalStore"
+                    description="Generate an NgRx SignalStore with state file"/>
+            <action id="NgNxScaffolder.NewDataAccessService"
+                    class="com.ngscaffolder.actions.NewDataAccessServiceAction"
+                    text="Data-Access Service"
+                    description="Generate an HttpClient data-access service"/>
+            <action id="NgNxScaffolder.NewPlaywrightTest"
+                    class="com.ngscaffolder.actions.NewPlaywrightTestAction"
+                    text="Playwright E2E Test"
+                    description="Generate Playwright E2E test with POM"/>
+            <action id="NgNxScaffolder.NewNxLibrary"
+                    class="com.ngscaffolder.actions.NewNxLibraryAction"
+                    text="Nx Library Structure"
+                    description="Scaffold an Nx library folder structure"/>
+        </group>
+    </actions>
+</idea-plugin>

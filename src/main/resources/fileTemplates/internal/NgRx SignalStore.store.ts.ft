@@ -1,0 +1,26 @@
+import { inject } from '@angular/core';
+import { signalStore, withMethods, withState } from '@ngrx/signals';
+#if(${INCLUDE_RX_METHOD} == "true")
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { pipe, switchMap, tap } from 'rxjs';
+#end
+import { patchState } from '@ngrx/signals';
+import { I${NAME_PASCAL}State, INITIAL_STATE } from './${NAME_KEBAB}.state';
+
+export const ${NAME_PASCAL}Store = signalStore(
+  withState<I${NAME_PASCAL}State>(INITIAL_STATE),
+  withMethods((store) => ({
+#if(${INCLUDE_RX_METHOD} == "true")
+    loadData: rxMethod<void>(
+      pipe(
+        tap(() => patchState(store, { isLoading: true })),
+        switchMap(() => {
+          // TODO: inject service and call API
+          return [];
+        }),
+        tap((data) => patchState(store, { isLoading: false })),
+      ),
+    ),
+#end
+  })),
+);

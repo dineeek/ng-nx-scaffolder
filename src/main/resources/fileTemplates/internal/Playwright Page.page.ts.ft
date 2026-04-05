@@ -1,0 +1,8 @@
+import type { Locator, Page } from '@playwright/test';
+import { ${FEATURE_PASCAL.toUpperCase()}_IDS } from './${FEATURE_KEBAB}.locators';
+
+export class ${FEATURE_PASCAL}Page {
+  constructor(private readonly page: Page) {}
+
+  // TODO: add locator getters and action methods
+}

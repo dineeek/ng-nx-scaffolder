@@ -1,0 +1,33 @@
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+#if(${INLINE_TEMPLATE} == "false")
+#if(${HAS_SCSS} == "true")
+
+@Component({
+  selector: '${SELECTOR}',
+  standalone: true,
+  imports: [],
+  templateUrl: './${NAME_KEBAB}.component.html',
+  styleUrl: './${NAME_KEBAB}.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+#else
+
+@Component({
+  selector: '${SELECTOR}',
+  standalone: true,
+  imports: [],
+  templateUrl: './${NAME_KEBAB}.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+#end
+#else
+
+@Component({
+  selector: '${SELECTOR}',
+  standalone: true,
+  imports: [],
+  template: `<p>${NAME_KEBAB} works!</p>`,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+#end
+export class ${NAME_PASCAL}Component {}
