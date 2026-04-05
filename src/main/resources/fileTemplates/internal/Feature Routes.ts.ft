@@ -1,0 +1,10 @@
+import { type Route } from '@angular/router'
+import { ${COMPONENT_CLASS} } from './container/${COMPONENT_NAME}.component'
+
+export const ${ROUTES_CONST}: Route[] = [
+  {
+    path: '',
+    pathMatch: 'full',
+    component: ${COMPONENT_CLASS}
+  }
+]

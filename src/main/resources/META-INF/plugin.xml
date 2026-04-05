@@ -4,8 +4,9 @@
     <vendor url="https://github.com/dineeek/ng-nx-scaffolder">dineeek</vendor>
     <description><![CDATA[
         Code generation plugin for Angular and Nx developers.
-        Generates standalone components, SignalStores, data-access services,
-        Playwright E2E tests, and Nx library structures.
+        Generates feature libraries (with store/facade/form/dialog/routing),
+        data-access services, model interfaces, UI components, utility files,
+        standalone components, SignalStores, and Playwright E2E tests.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -24,6 +25,30 @@
     <actions>
         <group id="NgNxScaffolder.NewGroup" text="Angular/Nx" popup="true">
             <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
+
+            <separator text="Nx Library Generators"/>
+            <action id="NgNxScaffolder.NewFeatureLib"
+                    class="com.ngscaffolder.actions.NewFeatureLibAction"
+                    text="Feature Library"
+                    description="Generate a feature lib with container, store, facade, form, mapper"/>
+            <action id="NgNxScaffolder.NewDataAccessLib"
+                    class="com.ngscaffolder.actions.NewDataAccessLibAction"
+                    text="Data-Access Library"
+                    description="Generate a data-access lib with HttpClient service"/>
+            <action id="NgNxScaffolder.NewModelLib"
+                    class="com.ngscaffolder.actions.NewModelLibAction"
+                    text="Model Library"
+                    description="Generate a model lib with interface"/>
+            <action id="NgNxScaffolder.NewUiLib"
+                    class="com.ngscaffolder.actions.NewUiLibAction"
+                    text="UI Library"
+                    description="Generate a UI lib with standalone example component"/>
+            <action id="NgNxScaffolder.NewUtilLib"
+                    class="com.ngscaffolder.actions.NewUtilLibAction"
+                    text="Util Library"
+                    description="Generate a util lib with utility file"/>
+
+            <separator text="Standalone Files"/>
             <action id="NgNxScaffolder.NewComponent"
                     class="com.ngscaffolder.actions.NewComponentAction"
                     text="Angular Component"
@@ -32,18 +57,12 @@
                     class="com.ngscaffolder.actions.NewSignalStoreAction"
                     text="NgRx SignalStore"
                     description="Generate an NgRx SignalStore with state file"/>
-            <action id="NgNxScaffolder.NewDataAccessService"
-                    class="com.ngscaffolder.actions.NewDataAccessServiceAction"
-                    text="Data-Access Service"
-                    description="Generate an HttpClient data-access service"/>
+
+            <separator text="E2E Testing"/>
             <action id="NgNxScaffolder.NewPlaywrightTest"
                     class="com.ngscaffolder.actions.NewPlaywrightTestAction"
                     text="Playwright E2E Test"
                     description="Generate Playwright E2E test with POM"/>
-            <action id="NgNxScaffolder.NewNxLibrary"
-                    class="com.ngscaffolder.actions.NewNxLibraryAction"
-                    text="Nx Library Structure"
-                    description="Scaffold an Nx library folder structure"/>
         </group>
     </actions>
 </idea-plugin>

@@ -1,0 +1,14 @@
+import { Injectable } from '@angular/core'
+import { FormControl, FormGroup } from '@angular/forms'
+import { type ${FORM_INTERFACE} } from './${FORM_NAME}.model'
+
+@Injectable()
+export class ${FORM_CLASS} {
+  private readonly form = new FormGroup<${FORM_INTERFACE}>({
+    myControl: new FormControl<string>(null)
+  })
+
+  get formGroup (): FormGroup<${FORM_INTERFACE}> {
+    return this.form
+  }
+}

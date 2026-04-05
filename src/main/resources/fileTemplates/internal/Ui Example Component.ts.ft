@@ -1,0 +1,11 @@
+import { ChangeDetectionStrategy, Component } from '@angular/core'
+
+@Component({
+  selector: '${PREFIX}-example',
+  standalone: true,
+  imports: [],
+  templateUrl: './example.component.html',
+  styleUrls: ['./example.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ExampleComponent {}

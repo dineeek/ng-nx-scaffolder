@@ -1,0 +1,17 @@
+import { TestBed } from '@angular/core/testing'
+import { ${STORE_CLASS} } from './${STORE_NAME}.store'
+
+describe('${STORE_CLASS}', () => {
+  let store: InstanceType<typeof ${STORE_CLASS}>
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [${STORE_CLASS}]
+    })
+    store = TestBed.inject(${STORE_CLASS})
+  })
+
+  it('should have initial brands', () => {
+    expect(store.brands()).toEqual(['Apple', 'Samsung', 'Google'])
+  })
+})

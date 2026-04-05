@@ -1,0 +1,13 @@
+import { Injectable#if(${HAS_STORE} == "true"), inject#end } from '@angular/core'
+#if(${HAS_STORE} == "true")
+import { ${STORE_CLASS} } from '../store/${STORE_NAME}.store'
+#end
+
+@Injectable()
+export class ${FACADE_CLASS} {
+#if(${HAS_STORE} == "true")
+  private readonly store = inject(${STORE_CLASS})
+
+  readonly brands = this.store.brands
+#end
+}

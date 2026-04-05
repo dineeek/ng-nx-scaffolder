@@ -6,6 +6,9 @@ out/
 .gradle/
 !gradle/wrapper/gradle-wrapper.jar
 
+# IntelliJ Platform SDK
+.intellijPlatform/
+
 # Kotlin
 .kotlin/
 

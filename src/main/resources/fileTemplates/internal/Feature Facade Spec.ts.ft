@@ -1,0 +1,20 @@
+import { TestBed } from '@angular/core/testing'
+import { ${FACADE_CLASS} } from './${FACADE_NAME}.service'
+#if(${HAS_STORE} == "true")
+import { ${STORE_CLASS} } from '../store/${STORE_NAME}.store'
+#end
+
+describe('${FACADE_CLASS}', () => {
+  let service: ${FACADE_CLASS}
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [#if(${HAS_STORE} == "true"){ provide: ${STORE_CLASS}, useValue: {} }, #end${FACADE_CLASS}]
+    })
+    service = TestBed.inject(${FACADE_CLASS})
+  })
+
+  it('should be created', () => {
+    expect(service).toBeTruthy()
+  })
+})

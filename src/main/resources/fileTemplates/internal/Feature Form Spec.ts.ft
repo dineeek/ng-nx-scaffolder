@@ -1,0 +1,22 @@
+import { TestBed } from '@angular/core/testing'
+import { ${FORM_CLASS} } from './${FORM_NAME}.service'
+
+describe('${FORM_CLASS}', () => {
+  let service: ${FORM_CLASS}
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [${FORM_CLASS}]
+    })
+    service = TestBed.inject(${FORM_CLASS})
+  })
+
+  it('should be created', () => {
+    expect(service).toBeTruthy()
+  })
+
+  it('should have a form group with myControl', () => {
+    expect(service.formGroup).toBeTruthy()
+    expect(service.formGroup.controls.myControl).toBeTruthy()
+  })
+})

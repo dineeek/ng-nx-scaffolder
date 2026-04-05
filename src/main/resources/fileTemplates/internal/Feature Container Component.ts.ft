@@ -1,0 +1,34 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject
+} from '@angular/core'
+#if(${HAS_STORE} == "true")
+import { ${STORE_CLASS} } from '../store/${STORE_NAME}.store'
+#end
+#if(${HAS_FACADE} == "true")
+import { ${FACADE_CLASS} } from '../facade/${FACADE_NAME}.service'
+#end
+#if(${HAS_FORM} == "true")
+import { ${FORM_CLASS} } from '../form/${FORM_NAME}.service'
+#end
+
+@Component({
+  selector: '${PREFIX}-${COMPONENT_NAME}',
+  standalone: true,
+  imports: [],
+  templateUrl: './${COMPONENT_NAME}.component.html',
+  styleUrls: ['./${COMPONENT_NAME}.component.scss'],
+  providers: [#if(${HAS_STORE} == "true")${STORE_CLASS}#end#if(${HAS_STORE} == "true" && ${HAS_FACADE} == "true"), #end#if(${HAS_FACADE} == "true")${FACADE_CLASS}#end#if((${HAS_STORE} == "true" || ${HAS_FACADE} == "true") && ${HAS_FORM} == "true"), #end#if(${HAS_FORM} == "true")${FORM_CLASS}#end],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ${COMPONENT_CLASS} {
+#if(${HAS_FACADE} == "true")
+  protected readonly facade = inject(${FACADE_CLASS})
+#elseif(${HAS_STORE} == "true")
+  protected readonly store = inject(${STORE_CLASS})
+#end
+#if(${HAS_FORM} == "true")
+  protected readonly formService = inject(${FORM_CLASS})
+#end
+}

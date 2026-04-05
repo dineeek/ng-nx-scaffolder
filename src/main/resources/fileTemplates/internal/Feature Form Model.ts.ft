@@ -1,0 +1,5 @@
+import { type FormControl } from '@angular/forms'
+
+export interface ${FORM_INTERFACE} {
+  myControl: FormControl<string>
+}

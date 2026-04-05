@@ -1,0 +1,12 @@
+import { type IExample } from '../models/example.model'
+#if(${HAS_STORE} == "true")
+import { type ${STORE_STATE_NAME} } from '../store/${STORE_NAME}.state'
+#end
+
+export class ${MAPPER_CLASS} {
+#if(${HAS_STORE} == "true")
+  static fromExampleToStoreModel (example: IExample[]): ${STORE_STATE_NAME} {
+    return null
+  }
+#end
+}

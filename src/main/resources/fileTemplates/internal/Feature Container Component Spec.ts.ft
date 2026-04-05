@@ -1,0 +1,48 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing'
+import { NO_ERRORS_SCHEMA, signal } from '@angular/core'
+import { ${COMPONENT_CLASS} } from './${COMPONENT_NAME}.component'
+#if(${HAS_STORE} == "true")
+import { ${STORE_CLASS} } from '../store/${STORE_NAME}.store'
+#end
+#if(${HAS_FACADE} == "true")
+import { ${FACADE_CLASS} } from '../facade/${FACADE_NAME}.service'
+#end
+#if(${HAS_FORM} == "true")
+import { ${FORM_CLASS} } from '../form/${FORM_NAME}.service'
+#end
+
+describe('${COMPONENT_CLASS}', () => {
+  let component: ${COMPONENT_CLASS}
+  let fixture: ComponentFixture<${COMPONENT_CLASS}>
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [${COMPONENT_CLASS}],
+      schemas: [NO_ERRORS_SCHEMA]
+    })
+      .overrideComponent(${COMPONENT_CLASS}, {
+        set: {
+          providers: [
+#if(${HAS_STORE} == "true")
+            { provide: ${STORE_CLASS}, useValue: {} },
+#end
+#if(${HAS_FACADE} == "true")
+            { provide: ${FACADE_CLASS}, useValue: {} },
+#end
+#if(${HAS_FORM} == "true")
+            { provide: ${FORM_CLASS}, useValue: {} },
+#end
+          ]
+        }
+      })
+      .compileComponents()
+
+    fixture = TestBed.createComponent(${COMPONENT_CLASS})
+    component = fixture.componentInstance
+    fixture.detectChanges()
+  })
+
+  it('should create', () => {
+    expect(component).toBeTruthy()
+  })
+})

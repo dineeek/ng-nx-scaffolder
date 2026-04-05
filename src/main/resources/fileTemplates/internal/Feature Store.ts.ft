@@ -1,0 +1,9 @@
+import { signalStore, withState, withMethods } from '@ngrx/signals'
+import { type ${STORE_STATE_NAME}, INITIAL_STATE } from './${STORE_NAME}.state'
+
+export const ${STORE_CLASS} = signalStore(
+  withState(INITIAL_STATE),
+  withMethods(store => ({
+    // add methods here
+  }))
+)

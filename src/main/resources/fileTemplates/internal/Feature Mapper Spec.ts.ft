@@ -1,0 +1,7 @@
+import { ${MAPPER_CLASS} } from './${MAPPER_NAME}.mapper'
+
+describe('${MAPPER_CLASS}', () => {
+  it('should be defined', () => {
+    expect(${MAPPER_CLASS}).toBeDefined()
+  })
+})
