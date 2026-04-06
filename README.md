@@ -1,7 +1,7 @@
 # ng-nx-scaffolder
 
 ![Build](https://github.com/dineeek/ng-nx-scaffolder/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/github/license/dineeek/ng-nx-scaffolder)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Uses `nx generate` under the hood to create the library structure, then adds Angular architectural patterns on top.
 
@@ -65,14 +65,8 @@ Type the abbreviation in any `.ts` file and press Tab:
 
 | Abbreviation | Expansion |
 |-|-|
-| `rxm` | `rxMethod<T>(pipe(switchMap(...)))` |
-| `sig` | `signal<T>(initialValue)` |
-| `comp` | `computed(() => ...)` |
-| `ps` | `patchState(store, { ... })` |
-| `inj` | `private readonly name = inject(Service)` |
-| `wstate` | `withState<IState>(INITIAL_STATE)` |
-| `tstep` | `await test.step('...', async () => { })` |
-| `tcase` | Playwright test case function with Fixtures |
+| `rxm` | `rxMethod<T>(pipe(switchMap(...)))` — NgRx SignalStore rxMethod |
+| `inj` | `private readonly name = inject(Service)` — auto-derives name from service |
 
 ## Workspace Auto-Detection
 
