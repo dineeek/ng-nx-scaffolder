@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.ngscaffolder.generators.NxCliRunner
 import com.ngscaffolder.generators.NxResult
+import com.ngscaffolder.generators.WorkspaceTools
 
 abstract class BaseScaffoldAction : AnAction() {
 
@@ -55,8 +56,30 @@ abstract class BaseScaffoldAction : AnAction() {
         return NxCliRunner().findWorkspaceRoot(directory)
     }
 
+    protected fun detectWorkspaceTools(workspaceRoot: VirtualFile): WorkspaceTools {
+        return NxCliRunner().detectWorkspaceTools(workspaceRoot)
+    }
+
     protected fun getRelativePath(workspaceRoot: VirtualFile, directory: VirtualFile): String {
         return VfsUtil.getRelativePath(directory, workspaceRoot) ?: directory.name
+    }
+
+    protected fun buildNxArgs(
+        name: String,
+        relativePath: String,
+        prefix: String? = null,
+        style: String = "none",
+        tools: WorkspaceTools,
+    ): List<String> {
+        val args = mutableListOf(
+            "--name=$name",
+            "--directory=$relativePath",
+            "--standalone",
+        )
+        if (prefix != null) args.add("--prefix=$prefix")
+        if (style != "none") args.add("--style=$style")
+        if (!tools.hasEslint) args.add("--linter=none")
+        return args
     }
 
     protected fun runNxGenerate(

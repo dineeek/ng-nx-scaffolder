@@ -19,19 +19,21 @@ class NewFeatureLibAction : BaseScaffoldAction() {
         if (name.isEmpty()) return
 
         val kebab = NamingUtils.toKebabCase(name)
+        val prefix = dialog.prefix.trim()
         val workspaceRoot = findWorkspaceRoot(directory)
         if (workspaceRoot == null) {
             showNxNotFound(project)
             return
         }
 
+        val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
-        val nxArgs = mutableListOf(
-            "--name=$kebab",
-            "--directory=$relativePath",
-            "--prefix=${dialog.prefix.trim()}",
-            "--style=scss",
-            "--standalone",
+        val nxArgs = buildNxArgs(
+            name = kebab,
+            relativePath = relativePath,
+            prefix = prefix,
+            style = "scss",
+            tools = tools,
         )
 
         val result = runNxGenerate(project, workspaceRoot, "@nx/angular:library", nxArgs)
@@ -44,7 +46,7 @@ class NewFeatureLibAction : BaseScaffoldAction() {
 
         val options = FeatureLibOptions(
             name = name,
-            prefix = dialog.prefix.trim(),
+            prefix = prefix,
             hasStore = dialog.hasStore,
             hasFacade = dialog.hasFacade,
             hasForm = dialog.hasForm,

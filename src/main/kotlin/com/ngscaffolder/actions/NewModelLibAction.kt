@@ -27,13 +27,9 @@ class NewModelLibAction : BaseScaffoldAction() {
             return
         }
 
+        val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
-        val nxArgs = listOf(
-            "--name=$kebab",
-            "--directory=$relativePath",
-            "--standalone",
-            "--style=none",
-        )
+        val nxArgs = buildNxArgs(name = kebab, relativePath = relativePath, tools = tools)
 
         val result = runNxGenerate(project, workspaceRoot, "@nx/angular:library", nxArgs)
         if (result == null || !result.success) {

@@ -29,13 +29,14 @@ class NewUiLibAction : BaseScaffoldAction() {
             return
         }
 
+        val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
-        val nxArgs = listOf(
-            "--name=$kebab",
-            "--directory=$relativePath",
-            "--prefix=$prefix",
-            "--style=scss",
-            "--standalone",
+        val nxArgs = buildNxArgs(
+            name = kebab,
+            relativePath = relativePath,
+            prefix = prefix,
+            style = "scss",
+            tools = tools,
         )
 
         val result = runNxGenerate(project, workspaceRoot, "@nx/angular:library", nxArgs)
