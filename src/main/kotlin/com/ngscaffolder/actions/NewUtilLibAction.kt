@@ -34,6 +34,8 @@ class NewUtilLibAction : BaseScaffoldAction() {
         val generator = "@nx/js:library"
         val nxArgs = buildJsLibNxArgs(name = kebab, relativePath = relativePath, tools = tools)
 
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
+
         val preview = runNxDryRun(project, workspaceRoot, generator, nxArgs)
         if (preview == null || !preview.success) {
             showNxError(project, preview)
@@ -48,14 +50,13 @@ class NewUtilLibAction : BaseScaffoldAction() {
         )
         if (!showTreePreview(project, flatEntries)) return
 
-        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
             showNxError(project, result)
             return
         }
 
-        VfsUtil.markDirtyAndRefresh(false, true, true, directory)
+        VfsUtil.markDirtyAndRefresh(false, true, true, directory, workspaceRoot)
         com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
             flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
             restoreWorkspaceFiles(workspaceRoot, snapshot)
