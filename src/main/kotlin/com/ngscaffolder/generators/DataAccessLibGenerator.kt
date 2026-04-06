@@ -23,6 +23,18 @@ class DataAccessLibGenerator(private val project: Project) {
         val libDir = srcDir.createChildDirectory(this, "lib")
         val servicesDir = libDir.createChildDirectory(this, "services")
 
+        // Config files
+        ConfigFileGenerator(project).generate(
+            directory = directory,
+            srcDir = srcDir,
+            libName = kebab,
+            prefix = kebab,
+            libType = "data-access",
+            hasSpecs = true,
+            hasNgPackage = false,
+            hasStyles = false,
+        )
+
         val serviceTpl = templateManager.getInternalTemplate("Data Access Service")
         createFile(servicesDir, "$kebab.service.ts", serviceTpl.getText(props))
 

@@ -23,6 +23,18 @@ class ModelLibGenerator(private val project: Project) {
         val libDir = srcDir.createChildDirectory(this, "lib")
         val modelsDir = libDir.createChildDirectory(this, "models")
 
+        // Config files
+        ConfigFileGenerator(project).generate(
+            directory = directory,
+            srcDir = srcDir,
+            libName = kebab,
+            prefix = kebab,
+            libType = "model",
+            hasSpecs = false,
+            hasNgPackage = false,
+            hasStyles = false,
+        )
+
         val tpl = templateManager.getInternalTemplate("Model Interface")
         createFile(modelsDir, "$kebab.model.ts", tpl.getText(props))
 

@@ -21,6 +21,18 @@ class UtilLibGenerator(private val project: Project) {
         val libDir = srcDir.createChildDirectory(this, "lib")
         val utilDir = libDir.createChildDirectory(this, kebab)
 
+        // Config files
+        ConfigFileGenerator(project).generate(
+            directory = directory,
+            srcDir = srcDir,
+            libName = kebab,
+            prefix = kebab,
+            libType = "util",
+            hasSpecs = true,
+            hasNgPackage = false,
+            hasStyles = false,
+        )
+
         val utilTpl = templateManager.getInternalTemplate("Util File")
         createFile(utilDir, "$kebab.util.ts", utilTpl.getText(props))
 

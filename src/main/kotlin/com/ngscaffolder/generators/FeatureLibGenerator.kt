@@ -74,6 +74,18 @@ class FeatureLibGenerator(private val project: Project) {
         val srcDir = directory.createChildDirectory(this, "src")
         val libDir = srcDir.createChildDirectory(this, "lib")
 
+        // Config files
+        ConfigFileGenerator(project).generate(
+            directory = directory,
+            srcDir = srcDir,
+            libName = kebab,
+            prefix = options.prefix,
+            libType = "feature",
+            hasSpecs = true,
+            hasNgPackage = true,
+            hasStyles = true,
+        )
+
         // Container
         val containerDir = libDir.createChildDirectory(this, "container")
         if (options.isDialog) {

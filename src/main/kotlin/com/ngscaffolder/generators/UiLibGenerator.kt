@@ -22,6 +22,18 @@ class UiLibGenerator(private val project: Project) {
         val libDir = srcDir.createChildDirectory(this, "lib")
         val exampleDir = libDir.createChildDirectory(this, "example")
 
+        // Config files
+        ConfigFileGenerator(project).generate(
+            directory = directory,
+            srcDir = srcDir,
+            libName = kebab,
+            prefix = prefix,
+            libType = "ui",
+            hasSpecs = true,
+            hasNgPackage = true,
+            hasStyles = true,
+        )
+
         val componentTpl = templateManager.getInternalTemplate("Ui Example Component")
         createFile(exampleDir, "example.component.ts", componentTpl.getText(props))
 
