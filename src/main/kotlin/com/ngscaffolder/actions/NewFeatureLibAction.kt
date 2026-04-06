@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.ngscaffolder.dialogs.FeatureLibDialog
 import com.ngscaffolder.generators.FeatureLibGenerator
 import com.ngscaffolder.generators.FeatureLibOptions
+import com.ngscaffolder.util.NamingUtils
 
 class NewFeatureLibAction : BaseScaffoldAction() {
 
@@ -17,6 +18,30 @@ class NewFeatureLibAction : BaseScaffoldAction() {
         val name = dialog.libName.trim()
         if (name.isEmpty()) return
 
+        val kebab = NamingUtils.toKebabCase(name)
+        val workspaceRoot = findWorkspaceRoot(directory)
+        if (workspaceRoot == null) {
+            showNxNotFound(project)
+            return
+        }
+
+        val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
+        val nxArgs = mutableListOf(
+            "--name=$kebab",
+            "--directory=$relativePath",
+            "--prefix=${dialog.prefix.trim()}",
+            "--style=scss",
+            "--standalone",
+        )
+
+        val result = runNxGenerate(project, workspaceRoot, "@nx/angular:library", nxArgs)
+        if (result == null || !result.success) {
+            showNxError(project, result)
+            return
+        }
+
+        val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
+
         val options = FeatureLibOptions(
             name = name,
             prefix = dialog.prefix.trim(),
@@ -28,7 +53,8 @@ class NewFeatureLibAction : BaseScaffoldAction() {
         )
 
         val file = runWriteAction {
-            FeatureLibGenerator(project).generate(directory, options)
+            cleanNxDefaultFiles(libRoot)
+            FeatureLibGenerator(project).generate(libRoot, options)
         }
         if (file != null) openFileInEditor(e, file)
     }

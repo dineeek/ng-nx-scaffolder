@@ -7,7 +7,13 @@ import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.progress.ProgressManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
+import com.ngscaffolder.generators.NxCliRunner
+import com.ngscaffolder.generators.NxResult
 
 abstract class BaseScaffoldAction : AnAction() {
 
@@ -18,20 +24,16 @@ abstract class BaseScaffoldAction : AnAction() {
             return
         }
 
-        // Check if we have a directory context from either source
         val hasFile = e.getData(CommonDataKeys.VIRTUAL_FILE) != null
         val hasIdeView = e.getData(LangDataKeys.IDE_VIEW)?.directories?.isNotEmpty() == true
         e.presentation.isEnabledAndVisible = hasFile || hasIdeView
     }
 
     protected fun getTargetDirectory(e: AnActionEvent): VirtualFile? {
-        // Try VIRTUAL_FILE first (right-click in project tree)
         val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
         if (file != null) {
             return if (file.isDirectory) file else file.parent
         }
-
-        // Try IdeView (New menu from top bar or keyboard shortcut)
         val ideView = e.getData(LangDataKeys.IDE_VIEW)
         return ideView?.orChooseDirectory?.virtualFile
     }
@@ -47,5 +49,54 @@ abstract class BaseScaffoldAction : AnAction() {
             result = action()
         }
         return result
+    }
+
+    protected fun findWorkspaceRoot(directory: VirtualFile): VirtualFile? {
+        return NxCliRunner().findWorkspaceRoot(directory)
+    }
+
+    protected fun getRelativePath(workspaceRoot: VirtualFile, directory: VirtualFile): String {
+        return VfsUtil.getRelativePath(directory, workspaceRoot) ?: directory.name
+    }
+
+    protected fun runNxGenerate(
+        project: Project,
+        workspaceRoot: VirtualFile,
+        generator: String,
+        args: List<String>,
+    ): NxResult? {
+        var nxResult: NxResult? = null
+        val completed = ProgressManager.getInstance().runProcessWithProgressSynchronously(
+            { nxResult = NxCliRunner().runGenerate(workspaceRoot, generator, args) },
+            "Running nx generate...",
+            true,
+            project,
+        )
+        return if (completed) nxResult else null
+    }
+
+    protected fun showNxError(project: Project, result: NxResult?) {
+        val message = result?.output ?: "Operation was cancelled."
+        Messages.showErrorDialog(project, message, "Nx Generate Failed")
+    }
+
+    protected fun showNxNotFound(project: Project) {
+        Messages.showErrorDialog(
+            project,
+            "Could not find nx.json in any parent directory.\nMake sure you are inside an Nx workspace.",
+            "Nx Workspace Not Found"
+        )
+    }
+
+    protected fun refreshAndFindLibDir(directory: VirtualFile, libName: String): VirtualFile? {
+        VfsUtil.markDirtyAndRefresh(false, true, true, directory)
+        return directory.findChild(libName)
+    }
+
+    protected fun cleanNxDefaultFiles(libDir: VirtualFile) {
+        val srcLib = libDir.findChild("src")?.findChild("lib") ?: return
+        for (child in srcLib.children) {
+            child.delete(this)
+        }
     }
 }

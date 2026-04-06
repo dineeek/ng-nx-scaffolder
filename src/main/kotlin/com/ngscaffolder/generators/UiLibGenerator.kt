@@ -3,13 +3,12 @@ package com.ngscaffolder.generators
 import com.intellij.ide.fileTemplates.FileTemplateManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.ngscaffolder.settings.PluginSettings
 import com.ngscaffolder.util.NamingUtils
 import java.util.*
 
 class UiLibGenerator(private val project: Project) {
 
-    fun generate(directory: VirtualFile, name: String, prefix: String): VirtualFile {
+    fun generate(libRoot: VirtualFile, name: String, prefix: String): VirtualFile {
         val kebab = NamingUtils.toKebabCase(name)
 
         val props = Properties().apply {
@@ -18,21 +17,9 @@ class UiLibGenerator(private val project: Project) {
 
         val templateManager = FileTemplateManager.getInstance(project)
 
-        val srcDir = directory.createChildDirectory(this, "src")
-        val libDir = srcDir.createChildDirectory(this, "lib")
+        val srcDir = libRoot.findChild("src")!!
+        val libDir = srcDir.findChild("lib")!!
         val exampleDir = libDir.createChildDirectory(this, "example")
-
-        // Config files
-        ConfigFileGenerator(project).generate(
-            directory = directory,
-            srcDir = srcDir,
-            libName = kebab,
-            prefix = prefix,
-            libType = "ui",
-            hasSpecs = true,
-            hasNgPackage = true,
-            hasStyles = true,
-        )
 
         val componentTpl = templateManager.getInternalTemplate("Ui Example Component")
         createFile(exampleDir, "example.component.ts", componentTpl.getText(props))
@@ -41,7 +28,7 @@ class UiLibGenerator(private val project: Project) {
         createFile(exampleDir, "example.component.html", htmlTpl.getText(props))
         createFile(exampleDir, "example.component.scss", "")
 
-        createFile(srcDir, "index.ts", "export { ExampleComponent } from './lib/example/example.component'\n")
+        overwriteFile(srcDir, "index.ts", "export { ExampleComponent } from './lib/example/example.component'\n")
 
         return exampleDir.findChild("example.component.ts")!!
     }
@@ -49,5 +36,14 @@ class UiLibGenerator(private val project: Project) {
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {
         val file = dir.createChildData(this, fileName)
         file.setBinaryContent(content.toByteArray())
+    }
+
+    private fun overwriteFile(dir: VirtualFile, fileName: String, content: String) {
+        val existing = dir.findChild(fileName)
+        if (existing != null) {
+            existing.setBinaryContent(content.toByteArray())
+        } else {
+            createFile(dir, fileName, content)
+        }
     }
 }

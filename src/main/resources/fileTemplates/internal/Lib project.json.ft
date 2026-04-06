@@ -1,9 +1,0 @@
-{
-  "name": "${LIB_NAME}",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "${LIB_NAME}/src",
-  "prefix": "${PREFIX}",
-  "tags": ["type:${LIB_TYPE}"],
-  "projectType": "library",
-  "targets": {}
-}

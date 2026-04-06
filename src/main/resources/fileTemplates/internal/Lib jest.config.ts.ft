@@ -1,8 +1,0 @@
-/* eslint-disable */
-export default {
-  displayName: '${LIB_NAME}',
-  preset: '../../../jest.preset.js',
-  coverageDirectory: '../../../coverage/${LIB_NAME}',
-  collectCoverage: true,
-  coverageReporters: ['html', 'lcov', 'text-summary']
-};

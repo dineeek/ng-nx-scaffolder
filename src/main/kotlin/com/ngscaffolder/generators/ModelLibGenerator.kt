@@ -8,7 +8,7 @@ import java.util.*
 
 class ModelLibGenerator(private val project: Project) {
 
-    fun generate(directory: VirtualFile, name: String): VirtualFile {
+    fun generate(libRoot: VirtualFile, name: String): VirtualFile {
         val kebab = NamingUtils.toKebabCase(name)
         val className = NamingUtils.toPascalCase(name)
 
@@ -19,26 +19,14 @@ class ModelLibGenerator(private val project: Project) {
 
         val templateManager = FileTemplateManager.getInstance(project)
 
-        val srcDir = directory.createChildDirectory(this, "src")
-        val libDir = srcDir.createChildDirectory(this, "lib")
+        val srcDir = libRoot.findChild("src")!!
+        val libDir = srcDir.findChild("lib")!!
         val modelsDir = libDir.createChildDirectory(this, "models")
-
-        // Config files
-        ConfigFileGenerator(project).generate(
-            directory = directory,
-            srcDir = srcDir,
-            libName = kebab,
-            prefix = kebab,
-            libType = "model",
-            hasSpecs = false,
-            hasNgPackage = false,
-            hasStyles = false,
-        )
 
         val tpl = templateManager.getInternalTemplate("Model Interface")
         createFile(modelsDir, "$kebab.model.ts", tpl.getText(props))
 
-        createFile(srcDir, "index.ts", "export { I$className } from './lib/models/$kebab.model'\n")
+        overwriteFile(srcDir, "index.ts", "export { I$className } from './lib/models/$kebab.model'\n")
 
         return modelsDir.findChild("$kebab.model.ts")!!
     }
@@ -46,5 +34,14 @@ class ModelLibGenerator(private val project: Project) {
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {
         val file = dir.createChildData(this, fileName)
         file.setBinaryContent(content.toByteArray())
+    }
+
+    private fun overwriteFile(dir: VirtualFile, fileName: String, content: String) {
+        val existing = dir.findChild(fileName)
+        if (existing != null) {
+            existing.setBinaryContent(content.toByteArray())
+        } else {
+            createFile(dir, fileName, content)
+        }
     }
 }

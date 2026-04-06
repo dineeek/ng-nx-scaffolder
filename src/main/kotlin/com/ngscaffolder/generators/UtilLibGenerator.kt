@@ -8,7 +8,7 @@ import java.util.*
 
 class UtilLibGenerator(private val project: Project) {
 
-    fun generate(directory: VirtualFile, name: String): VirtualFile {
+    fun generate(libRoot: VirtualFile, name: String): VirtualFile {
         val kebab = NamingUtils.toKebabCase(name)
 
         val props = Properties().apply {
@@ -17,21 +17,9 @@ class UtilLibGenerator(private val project: Project) {
 
         val templateManager = FileTemplateManager.getInstance(project)
 
-        val srcDir = directory.createChildDirectory(this, "src")
-        val libDir = srcDir.createChildDirectory(this, "lib")
+        val srcDir = libRoot.findChild("src")!!
+        val libDir = srcDir.findChild("lib")!!
         val utilDir = libDir.createChildDirectory(this, kebab)
-
-        // Config files
-        ConfigFileGenerator(project).generate(
-            directory = directory,
-            srcDir = srcDir,
-            libName = kebab,
-            prefix = kebab,
-            libType = "util",
-            hasSpecs = true,
-            hasNgPackage = false,
-            hasStyles = false,
-        )
 
         val utilTpl = templateManager.getInternalTemplate("Util File")
         createFile(utilDir, "$kebab.util.ts", utilTpl.getText(props))
@@ -39,7 +27,7 @@ class UtilLibGenerator(private val project: Project) {
         val specTpl = templateManager.getInternalTemplate("Util Spec")
         createFile(utilDir, "$kebab.util.spec.ts", specTpl.getText(props))
 
-        createFile(srcDir, "index.ts", "export {} from './lib/$kebab/$kebab.util'\n")
+        overwriteFile(srcDir, "index.ts", "export {} from './lib/$kebab/$kebab.util'\n")
 
         return utilDir.findChild("$kebab.util.ts")!!
     }
@@ -47,5 +35,14 @@ class UtilLibGenerator(private val project: Project) {
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {
         val file = dir.createChildData(this, fileName)
         file.setBinaryContent(content.toByteArray())
+    }
+
+    private fun overwriteFile(dir: VirtualFile, fileName: String, content: String) {
+        val existing = dir.findChild(fileName)
+        if (existing != null) {
+            existing.setBinaryContent(content.toByteArray())
+        } else {
+            createFile(dir, fileName, content)
+        }
     }
 }

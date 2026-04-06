@@ -18,7 +18,7 @@ data class FeatureLibOptions(
 
 class FeatureLibGenerator(private val project: Project) {
 
-    fun generate(directory: VirtualFile, options: FeatureLibOptions): VirtualFile {
+    fun generate(libRoot: VirtualFile, options: FeatureLibOptions): VirtualFile {
         val kebab = NamingUtils.toKebabCase(options.name)
         val className = NamingUtils.toPascalCase(options.name)
 
@@ -70,21 +70,8 @@ class FeatureLibGenerator(private val project: Project) {
 
         val templateManager = FileTemplateManager.getInstance(project)
 
-        // Create directory structure
-        val srcDir = directory.createChildDirectory(this, "src")
-        val libDir = srcDir.createChildDirectory(this, "lib")
-
-        // Config files
-        ConfigFileGenerator(project).generate(
-            directory = directory,
-            srcDir = srcDir,
-            libName = kebab,
-            prefix = options.prefix,
-            libType = "feature",
-            hasSpecs = true,
-            hasNgPackage = true,
-            hasStyles = true,
-        )
+        val srcDir = libRoot.findChild("src")!!
+        val libDir = srcDir.findChild("lib")!!
 
         // Container
         val containerDir = libDir.createChildDirectory(this, "container")
@@ -156,7 +143,7 @@ class FeatureLibGenerator(private val project: Project) {
             createFile(libDir, "${kebab}.routes.ts", routesTpl.getText(props))
         }
 
-        // Barrel export
+        // Barrel export (overwrite nx default)
         val barrelLines = mutableListOf("export * from './lib/container/$componentName.component'")
         if (options.hasRouting && !options.isDialog) {
             barrelLines.add("export * from './lib/${kebab}.routes'")
@@ -164,7 +151,7 @@ class FeatureLibGenerator(private val project: Project) {
         if (options.isDialog) {
             barrelLines.add("export * from './lib/models/$dialogModelName.model'")
         }
-        createFile(srcDir, "index.ts", barrelLines.joinToString("\n") + "\n")
+        overwriteFile(srcDir, "index.ts", barrelLines.joinToString("\n") + "\n")
 
         return containerDir.findChild("$componentName.component.ts")!!
     }
@@ -172,5 +159,14 @@ class FeatureLibGenerator(private val project: Project) {
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {
         val file = dir.createChildData(this, fileName)
         file.setBinaryContent(content.toByteArray())
+    }
+
+    private fun overwriteFile(dir: VirtualFile, fileName: String, content: String) {
+        val existing = dir.findChild(fileName)
+        if (existing != null) {
+            existing.setBinaryContent(content.toByteArray())
+        } else {
+            createFile(dir, fileName, content)
+        }
     }
 }

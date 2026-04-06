@@ -8,7 +8,7 @@ import java.util.*
 
 class DataAccessLibGenerator(private val project: Project) {
 
-    fun generate(directory: VirtualFile, name: String): VirtualFile {
+    fun generate(libRoot: VirtualFile, name: String): VirtualFile {
         val kebab = NamingUtils.toKebabCase(name)
         val className = NamingUtils.toPascalCase(name)
 
@@ -19,21 +19,9 @@ class DataAccessLibGenerator(private val project: Project) {
 
         val templateManager = FileTemplateManager.getInstance(project)
 
-        val srcDir = directory.createChildDirectory(this, "src")
-        val libDir = srcDir.createChildDirectory(this, "lib")
+        val srcDir = libRoot.findChild("src")!!
+        val libDir = srcDir.findChild("lib")!!
         val servicesDir = libDir.createChildDirectory(this, "services")
-
-        // Config files
-        ConfigFileGenerator(project).generate(
-            directory = directory,
-            srcDir = srcDir,
-            libName = kebab,
-            prefix = kebab,
-            libType = "data-access",
-            hasSpecs = true,
-            hasNgPackage = false,
-            hasStyles = false,
-        )
 
         val serviceTpl = templateManager.getInternalTemplate("Data Access Service")
         createFile(servicesDir, "$kebab.service.ts", serviceTpl.getText(props))
@@ -41,7 +29,7 @@ class DataAccessLibGenerator(private val project: Project) {
         val specTpl = templateManager.getInternalTemplate("Data Access Service Spec")
         createFile(servicesDir, "$kebab.service.spec.ts", specTpl.getText(props))
 
-        createFile(srcDir, "index.ts", "export { ${className}Service } from './lib/services/$kebab.service'\n")
+        overwriteFile(srcDir, "index.ts", "export { ${className}Service } from './lib/services/$kebab.service'\n")
 
         return servicesDir.findChild("$kebab.service.ts")!!
     }
@@ -49,5 +37,14 @@ class DataAccessLibGenerator(private val project: Project) {
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {
         val file = dir.createChildData(this, fileName)
         file.setBinaryContent(content.toByteArray())
+    }
+
+    private fun overwriteFile(dir: VirtualFile, fileName: String, content: String) {
+        val existing = dir.findChild(fileName)
+        if (existing != null) {
+            existing.setBinaryContent(content.toByteArray())
+        } else {
+            createFile(dir, fileName, content)
+        }
     }
 }
