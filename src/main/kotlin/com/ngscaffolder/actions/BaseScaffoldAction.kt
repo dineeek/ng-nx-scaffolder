@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.VfsUtil
 import com.intellij.openapi.vfs.VirtualFile
 import com.ngscaffolder.generators.NxCliRunner
 import com.ngscaffolder.generators.NxResult
+import com.ngscaffolder.generators.TestRunner
 import com.ngscaffolder.generators.WorkspaceTools
 
 abstract class BaseScaffoldAction : AnAction() {
@@ -79,6 +80,7 @@ abstract class BaseScaffoldAction : AnAction() {
         if (prefix != null) args.add("--prefix=$prefix")
         if (style != "none") args.add("--style=$style")
         if (!tools.hasEslint) args.add("--linter=none")
+        args.add("--unitTestRunner=${tools.testRunner.cliValue}")
         return args
     }
 

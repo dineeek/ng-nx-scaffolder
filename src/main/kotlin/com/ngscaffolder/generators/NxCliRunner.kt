@@ -6,10 +6,17 @@ import com.intellij.openapi.vfs.VirtualFile
 
 data class NxResult(val success: Boolean, val output: String)
 
+enum class TestRunner(val cliValue: String) {
+    JEST("jest"),
+    VITEST("vitest"),
+    NONE("none"),
+}
+
 data class WorkspaceTools(
     val hasEslint: Boolean,
     val hasStylelint: Boolean,
     val hasPrettier: Boolean,
+    val testRunner: TestRunner,
 )
 
 class NxCliRunner {
@@ -34,7 +41,23 @@ class NxCliRunner {
             hasPrettier = hasAnyFile(workspaceRoot,
                 ".prettierrc", ".prettierrc.json", ".prettierrc.js", ".prettierrc.yaml", ".prettierrc.yml",
                 "prettier.config.js", "prettier.config.mjs", "prettier.config.cjs"),
+            testRunner = detectTestRunner(workspaceRoot),
         )
+    }
+
+    private fun detectTestRunner(workspaceRoot: VirtualFile): TestRunner {
+        val hasVitest = hasAnyFile(workspaceRoot,
+            "vitest.config.ts", "vitest.config.js", "vitest.config.mts",
+            "vitest.workspace.ts", "vitest.workspace.js")
+        val hasJest = hasAnyFile(workspaceRoot,
+            "jest.config.ts", "jest.config.js", "jest.preset.js", "jest.preset.ts")
+
+        return when {
+            hasVitest && !hasJest -> TestRunner.VITEST
+            hasJest && !hasVitest -> TestRunner.JEST
+            hasVitest && hasJest -> TestRunner.JEST // both present, prefer jest (more common in Angular)
+            else -> TestRunner.NONE
+        }
     }
 
     fun runGenerate(
