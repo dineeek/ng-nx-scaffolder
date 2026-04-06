@@ -17,7 +17,6 @@ repositories {
 dependencies {
     intellijPlatform {
         intellijIdeaUltimate("2024.1.7")
-        bundledPlugin("JavaScript")
         instrumentationTools()
     }
 

@@ -10,7 +10,6 @@
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
-    <depends>JavaScript</depends>
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService
@@ -24,7 +23,7 @@
 
     <actions>
         <group id="NgNxScaffolder.NewGroup" text="Angular/Nx" popup="true">
-            <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewDir"/>
+            <add-to-group group-id="NewGroup" anchor="last"/>
 
             <separator text="Nx Library Generators"/>
             <action id="NgNxScaffolder.NewFeatureLib"

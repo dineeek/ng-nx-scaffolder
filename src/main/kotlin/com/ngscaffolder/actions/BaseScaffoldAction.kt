@@ -11,7 +11,7 @@ abstract class BaseScaffoldAction : AnAction() {
 
     override fun update(e: AnActionEvent) {
         val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
-        e.presentation.isEnabledAndVisible = file != null
+        e.presentation.isEnabled = file != null
     }
 
     protected fun getTargetDirectory(e: AnActionEvent): VirtualFile? {
