@@ -15,7 +15,7 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
 
         val dialog = SimpleLibDialog(
             "New Data-Access Library",
-            "e.g. users → services/users.service.ts"
+            "e.g. users → users/users.service.ts"
         )
         if (!dialog.showAndGet()) return
 
@@ -31,8 +31,8 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
 
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
-        val generator = "@nx/js:library"
-        val nxArgs = buildJsLibNxArgs(name = kebab, relativePath = relativePath, tools = tools)
+        val generator = getConfiguredGenerator()
+        val nxArgs = buildNxArgs(name = kebab, relativePath = relativePath, tools = tools)
 
         val preview = runNxDryRun(project, workspaceRoot, generator, nxArgs)
         if (preview == null || !preview.success) {
@@ -42,12 +42,13 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
         val parsed = parseDryRunOutput(preview.output)
         val nxLibRoot = extractLibRoot(parsed) ?: relativePath
         val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + listOf(
-            PreviewEntry("CREATE", "$relativePath/src/lib/services/$kebab.service.ts"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/services/$kebab.service.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.service.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.service.spec.ts"),
             PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
         )
         if (!showTreePreview(project, flatEntries)) return
 
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
             showNxError(project, result)
@@ -55,7 +56,10 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
         }
 
         VfsUtil.markDirtyAndRefresh(false, true, true, directory)
-        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> { flattenNestedLib(workspaceRoot, nxLibRoot, relativePath) }
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
+            restoreWorkspaceFiles(workspaceRoot, snapshot)
+        }
         val libRoot = refreshAndFindLibByPath(workspaceRoot, relativePath) ?: return
 
         val file = runWithCleanup(project, libRoot) {

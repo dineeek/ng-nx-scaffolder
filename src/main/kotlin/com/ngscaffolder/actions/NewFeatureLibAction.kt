@@ -1,7 +1,9 @@
 package com.ngscaffolder.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.vfs.VfsUtil
 import com.ngscaffolder.dialogs.FeatureLibDialog
+import com.ngscaffolder.dialogs.PreviewEntry
 import com.ngscaffolder.generators.FeatureLibGenerator
 import com.ngscaffolder.generators.FeatureLibOptions
 import com.ngscaffolder.util.NamingUtils
@@ -42,15 +44,57 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             showNxError(project, preview)
             return
         }
-        if (!showDryRunPreview(project, preview.output)) return
+        val parsed = parseDryRunOutput(preview.output)
+        val nxLibRoot = extractLibRoot(parsed) ?: relativePath
 
+        val componentName = "$kebab-container"
+        val customEntries = mutableListOf(
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.html"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.scss"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$kebab.mapper.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$kebab.mapper.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/models/example.model.ts"),
+            PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
+        )
+        if (dialog.hasStore) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$kebab.store.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$kebab.state.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$kebab.store.spec.ts"))
+        }
+        if (dialog.hasFacade) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$kebab-facade.service.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$kebab-facade.service.spec.ts"))
+        }
+        if (dialog.hasForm) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.service.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.model.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.service.spec.ts"))
+        }
+        if (dialog.hasRouting && !dialog.isDialog) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/$kebab.routes.ts"))
+        }
+        if (dialog.isDialog) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/models/$kebab-dialog.model.ts"))
+        }
+
+        val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + customEntries
+        if (!showTreePreview(project, flatEntries)) return
+
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
             showNxError(project, result)
             return
         }
 
-        val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
+        VfsUtil.markDirtyAndRefresh(false, true, true, directory)
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
+            restoreWorkspaceFiles(workspaceRoot, snapshot)
+        }
+        val libRoot = refreshAndFindLibByPath(workspaceRoot, relativePath) ?: return
 
         val options = FeatureLibOptions(
             name = name,

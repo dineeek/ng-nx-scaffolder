@@ -1,6 +1,8 @@
 package com.ngscaffolder.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.vfs.VfsUtil
+import com.ngscaffolder.dialogs.PreviewEntry
 import com.ngscaffolder.dialogs.SimpleLibDialog
 import com.ngscaffolder.generators.UiLibGenerator
 import com.ngscaffolder.util.NamingUtils
@@ -45,15 +47,30 @@ class NewUiLibAction : BaseScaffoldAction() {
             showNxError(project, preview)
             return
         }
-        if (!showDryRunPreview(project, preview.output)) return
+        val parsed = parseDryRunOutput(preview.output)
+        val nxLibRoot = extractLibRoot(parsed) ?: relativePath
+        val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + listOf(
+            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.html"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.scss"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.spec.ts"),
+            PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
+        )
+        if (!showTreePreview(project, flatEntries)) return
 
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
             showNxError(project, result)
             return
         }
 
-        val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
+        VfsUtil.markDirtyAndRefresh(false, true, true, directory)
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
+            restoreWorkspaceFiles(workspaceRoot, snapshot)
+        }
+        val libRoot = refreshAndFindLibByPath(workspaceRoot, relativePath) ?: return
 
         val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)

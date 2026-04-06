@@ -47,6 +47,7 @@ class NewModelLibAction : BaseScaffoldAction() {
         )
         if (!showTreePreview(project, flatEntries)) return
 
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
             showNxError(project, result)
@@ -54,7 +55,10 @@ class NewModelLibAction : BaseScaffoldAction() {
         }
 
         VfsUtil.markDirtyAndRefresh(false, true, true, directory)
-        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> { flattenNestedLib(workspaceRoot, nxLibRoot, relativePath) }
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
+            restoreWorkspaceFiles(workspaceRoot, snapshot)
+        }
         val libRoot = refreshAndFindLibByPath(workspaceRoot, relativePath) ?: return
 
         val file = runWithCleanup(project, libRoot) {

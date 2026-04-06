@@ -141,6 +141,25 @@ abstract class BaseScaffoldAction : AnAction() {
         return PluginSettings.getInstance().state.nxGenerator
     }
 
+    protected fun snapshotWorkspaceFiles(workspaceRoot: VirtualFile): Map<String, ByteArray> {
+        val filesToPreserve = listOf(".prettierignore", "nx.json")
+        val snapshot = mutableMapOf<String, ByteArray>()
+        for (name in filesToPreserve) {
+            val file = workspaceRoot.findChild(name) ?: continue
+            snapshot[name] = file.contentsToByteArray()
+        }
+        return snapshot
+    }
+
+    protected fun restoreWorkspaceFiles(workspaceRoot: VirtualFile, snapshot: Map<String, ByteArray>) {
+        for ((name, content) in snapshot) {
+            val file = workspaceRoot.findChild(name) ?: continue
+            if (!file.contentsToByteArray().contentEquals(content)) {
+                file.setBinaryContent(content)
+            }
+        }
+    }
+
     protected fun runNxGenerate(
         project: Project,
         workspaceRoot: VirtualFile,
@@ -194,8 +213,12 @@ abstract class BaseScaffoldAction : AnAction() {
     protected fun filterCleanedFiles(entries: List<PreviewEntry>): List<PreviewEntry> {
         // Matches Angular component defaults and JS lib defaults in src/lib/
         val cleanedPattern = Regex(".*/src/lib/[^/]+(/.*)?\\.((component\\.(ts|html|css|scss|spec\\.ts))|ts)$")
+        // Workspace root files we restore after generation
+        val restoredFiles = setOf(".prettierignore", "nx.json")
         return entries.filter { entry ->
+            val fileName = entry.path.substringAfterLast("/")
             !(entry.operation == "CREATE" && cleanedPattern.matches(entry.path))
+                && !(entry.operation == "UPDATE" && fileName in restoredFiles)
         }
     }
 
@@ -270,6 +293,7 @@ abstract class BaseScaffoldAction : AnAction() {
         }
         nestedDir.delete(this)
         fixFlattenedPaths(targetDir, nxLibRoot, targetPath)
+        fixWorkspaceRootPaths(workspaceRoot, nxLibRoot, targetPath)
     }
 
     private fun fixFlattenedPaths(libDir: VirtualFile, nxLibRoot: String, targetPath: String) {
@@ -297,6 +321,21 @@ abstract class BaseScaffoldAction : AnAction() {
             val doubledName = "$targetName-$nxName"
             content = content.replace(doubledName, targetName)
             file.setBinaryContent(content.toByteArray())
+        }
+    }
+
+    private fun fixWorkspaceRootPaths(workspaceRoot: VirtualFile, nxLibRoot: String, targetPath: String) {
+        // Fix tsconfig.base.json path alias (e.g. "button/button" → "button", path libs/button/button/... → libs/button/...)
+        val tsconfigBase = workspaceRoot.findChild("tsconfig.base.json")
+        if (tsconfigBase != null) {
+            var content = String(tsconfigBase.contentsToByteArray())
+            content = content.replace(nxLibRoot, targetPath)
+            // Fix doubled alias key (e.g. "@scope/button/button" → "@scope/button")
+            val nxName = nxLibRoot.substringAfterLast("/")
+            val targetName = targetPath.substringAfterLast("/")
+            val doubledName = "$targetName/$nxName"
+            content = content.replace(doubledName, targetName)
+            tsconfigBase.setBinaryContent(content.toByteArray())
         }
     }
 
