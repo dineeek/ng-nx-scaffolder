@@ -19,7 +19,6 @@ class NewFeatureLibAction : BaseScaffoldAction() {
 
         val options = FeatureLibOptions(
             name = name,
-            domain = dialog.domain.trim(),
             prefix = dialog.prefix.trim(),
             hasStore = dialog.hasStore,
             hasFacade = dialog.hasFacade,

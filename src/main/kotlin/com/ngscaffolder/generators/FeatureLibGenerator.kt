@@ -8,14 +8,12 @@ import java.util.*
 
 data class FeatureLibOptions(
     val name: String,
-    val domain: String,
     val prefix: String,
     val hasStore: Boolean,
     val hasFacade: Boolean,
     val hasForm: Boolean,
     val hasRouting: Boolean,
     val isDialog: Boolean,
-    val dialogSize: String = "large",
 )
 
 class FeatureLibGenerator(private val project: Project) {
@@ -73,8 +71,8 @@ class FeatureLibGenerator(private val project: Project) {
         val templateManager = FileTemplateManager.getInstance(project)
 
         // Create directory structure
-        val libDir = directory.createChildDirectory(this, "src")
-            .createChildDirectory(this, "lib")
+        val srcDir = directory.createChildDirectory(this, "src")
+        val libDir = srcDir.createChildDirectory(this, "lib")
 
         // Container
         val containerDir = libDir.createChildDirectory(this, "container")
@@ -143,18 +141,18 @@ class FeatureLibGenerator(private val project: Project) {
         // Routing (conditional)
         if (options.hasRouting && !options.isDialog) {
             val routesTpl = templateManager.getInternalTemplate("Feature Routes")
-            createFile(libDir, "${kebab}-routing.routes.ts", routesTpl.getText(props))
+            createFile(libDir, "${kebab}.routes.ts", routesTpl.getText(props))
         }
 
         // Barrel export
         val barrelLines = mutableListOf("export * from './lib/container/$componentName.component'")
         if (options.hasRouting && !options.isDialog) {
-            barrelLines.add("export * from './lib/${kebab}-routing.routes'")
+            barrelLines.add("export * from './lib/${kebab}.routes'")
         }
         if (options.isDialog) {
             barrelLines.add("export * from './lib/models/$dialogModelName.model'")
         }
-        createFile(directory.findChild("src")!!, "index.ts", barrelLines.joinToString("\n") + "\n")
+        createFile(srcDir, "index.ts", barrelLines.joinToString("\n") + "\n")
 
         return containerDir.findChild("$componentName.component.ts")!!
     }

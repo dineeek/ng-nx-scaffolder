@@ -10,7 +10,6 @@ class FeatureLibDialog : DialogWrapper(true) {
     private val settings = PluginSettings.getInstance().state
 
     var libName: String = ""
-    var domain: String = settings.nxDefaultDomain
     var prefix: String = settings.selectorPrefix
     var hasStore: Boolean = true
     var hasFacade: Boolean = false
@@ -28,12 +27,7 @@ class FeatureLibDialog : DialogWrapper(true) {
             textField()
                 .bindText(::libName)
                 .focused()
-                .comment("e.g. offers, user-profile (without domain/type prefix)")
-        }
-        row("Domain:") {
-            textField()
-                .bindText(::domain)
-                .comment("e.g. sales, ffu, hub")
+                .comment("e.g. user-profile, checkout, order-details")
         }
         row("Selector prefix:") {
             textField()

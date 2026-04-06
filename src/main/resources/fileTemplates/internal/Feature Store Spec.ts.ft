@@ -11,7 +11,7 @@ describe('${STORE_CLASS}', () => {
     store = TestBed.inject(${STORE_CLASS})
   })
 
-  it('should have initial brands', () => {
-    expect(store.brands()).toEqual(['Apple', 'Samsung', 'Google'])
+  it('should have initial state', () => {
+    expect(store.isLoading()).toBe(false)
   })
 })

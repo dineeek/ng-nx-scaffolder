@@ -1,7 +1,7 @@
 export interface ${STORE_STATE_NAME} {
-  brands: string[]
+  isLoading: boolean
 }
 
 export const INITIAL_STATE: ${STORE_STATE_NAME} = {
-  brands: ['Apple', 'Samsung', 'Google']
+  isLoading: false,
 }

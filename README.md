@@ -1,6 +1,6 @@
 # ng-nx-scaffolder
 
-IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Generates complete file structures matching standard Nx workspace generator conventions.
+IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Generates complete file structures following standard Angular and Nx conventions.
 
 ## Features
 
@@ -10,15 +10,15 @@ Access via **Right-click > New > Angular/Nx** or **File > New > Angular/Nx**.
 
 #### Feature Library
 
-Generates a full feature lib with container component and optional layers:
+Generates a full feature lib with a container component and optional architectural layers:
 
 | Option | Default | What it generates |
 |-|-|-|
-| Store | on | `store/{name}.store.ts`, `{name}.state.ts`, `{name}.store.spec.ts` |
-| Facade | off | `facade/{name}-facade.service.ts`, spec |
-| Form | off | `form/{name}-form.service.ts`, `{name}-form.model.ts`, spec |
-| Routing | off | `{name}-routing.routes.ts` |
-| Dialog | off | Dialog variant of container with `MAT_DIALOG_DATA`, dialog model interfaces |
+| Store | on | `store/{name}.store.ts`, `{name}.state.ts`, `{name}.store.spec.ts` — NgRx SignalStore |
+| Facade | off | `facade/{name}-facade.service.ts` + spec — abstraction layer over store |
+| Form | off | `form/{name}-form.service.ts`, `{name}-form.model.ts` + spec — typed reactive form |
+| Routing | off | `{name}.routes.ts` — Angular route config |
+| Dialog | off | Dialog variant of container with `MAT_DIALOG_DATA` + response/data interfaces |
 
 Always generates: container component (`.ts`, `.html`, `.scss`, `.spec.ts`), mapper, models folder, barrel `index.ts`.
 
@@ -47,40 +47,48 @@ src/
     │   └── {name}.mapper.spec.ts
     ├── models/
     │   └── example.model.ts
-    └── {name}-routing.routes.ts        # if routing enabled
+    └── {name}.routes.ts                # if routing enabled
 ```
 
 #### Data-Access Library
+
+Generates an Angular service with `HttpClient` injection:
 
 ```
 src/
 ├── index.ts
 └── lib/services/
-    ├── {name}.service.ts               # @Injectable + HttpClient
+    ├── {name}.service.ts
     └── {name}.service.spec.ts
 ```
 
 #### Model Library
 
+Generates a TypeScript interface file:
+
 ```
 src/
 ├── index.ts
 └── lib/models/
-    └── {name}.model.ts                 # empty I{Name} interface
+    └── {name}.model.ts
 ```
 
 #### UI Library
+
+Generates a standalone Angular component:
 
 ```
 src/
 ├── index.ts
 └── lib/example/
-    ├── example.component.ts            # standalone, OnPush
+    ├── example.component.ts
     ├── example.component.html
     └── example.component.scss
 ```
 
 #### Util Library
+
+Generates a utility file with spec:
 
 ```
 src/
@@ -99,7 +107,7 @@ feature-{name}/
 ├── cycles/
 │   └── all.spec.ts
 ├── tests/
-│   ├── {test-name}.ts                  # async function with test.step()
+│   ├── {test-name}.ts
 │   └── index.ts
 └── pages/
     ├── {name}.locators.ts
@@ -128,8 +136,7 @@ Type the abbreviation in any `.ts` file and press Tab:
 
 | Setting | Default | Description |
 |-|-|-|
-| Selector prefix | `app` | Component selector prefix (e.g. `sp-feature`, `ef`) |
-| Default domain | _(empty)_ | Pre-fills the domain field in dialogs |
+| Selector prefix | `app` | Component selector prefix |
 | Playwright fixture type | `Fixtures` | Type name for E2E test fixtures |
 | Playwright domain prefix | _(empty)_ | Tag prefix in test describe blocks |
 
@@ -139,10 +146,6 @@ Type the abbreviation in any `.ts` file and press Tab:
 - Java 17+
 
 ## Development
-
-### Prerequisites
-
-- JDK 17+ (the project uses Gradle wrapper, no Gradle install needed)
 
 ### Build
 
@@ -156,7 +159,7 @@ Type the abbreviation in any `.ts` file and press Tab:
 ./gradlew runIde
 ```
 
-This launches a sandboxed IntelliJ instance with the plugin loaded. Use it to test all generators manually.
+Launches a sandboxed IntelliJ instance with the plugin loaded for manual testing.
 
 ### Run tests
 
@@ -176,35 +179,35 @@ Produces `build/distributions/ng-nx-scaffolder-{version}.zip`.
 
 ### From disk
 
-1. Build the plugin: `./gradlew buildPlugin`
-2. In IntelliJ/WebStorm: **Settings > Plugins > Gear icon > Install Plugin from Disk**
+1. `./gradlew buildPlugin`
+2. **Settings > Plugins > Gear icon > Install Plugin from Disk**
 3. Select `build/distributions/ng-nx-scaffolder-{version}.zip`
 4. Restart the IDE
 
-### From JetBrains Marketplace (future)
+### From JetBrains Marketplace
 
 ```bash
 ./gradlew publishPlugin
 ```
 
-Requires `ORG_GRADLE_PROJECT_intellijPublishToken` environment variable with a valid [JetBrains Marketplace](https://plugins.jetbrains.com/) token.
+Requires `ORG_GRADLE_PROJECT_intellijPublishToken` environment variable.
 
 ## Project Structure
 
 ```
 src/main/
 ├── kotlin/com/ngscaffolder/
-│   ├── actions/          # Menu actions (6)
-│   ├── dialogs/          # Input dialogs (3)
-│   ├── generators/       # File generation logic (6)
-│   ├── settings/         # Plugin configuration persistence
+│   ├── actions/          # Menu actions
+│   ├── dialogs/          # Input dialogs
+│   ├── generators/       # File generation logic
+│   ├── settings/         # Plugin configuration
 │   └── util/             # NamingUtils (kebab/Pascal/camel case)
 └── resources/
     ├── META-INF/plugin.xml
-    ├── fileTemplates/internal/   # 28 Velocity templates
+    ├── fileTemplates/internal/   # Velocity templates
     └── liveTemplates/AngularNx.xml
 ```
 
 ## License
 
-Private repository. All rights reserved.
+MIT

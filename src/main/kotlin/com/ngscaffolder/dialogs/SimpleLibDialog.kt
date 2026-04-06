@@ -15,7 +15,6 @@ class SimpleLibDialog(
     private val settings = PluginSettings.getInstance().state
 
     var libName: String = ""
-    var domain: String = settings.nxDefaultDomain
     var prefix: String = settings.selectorPrefix
 
     init {
@@ -29,11 +28,6 @@ class SimpleLibDialog(
                 .bindText(::libName)
                 .focused()
                 .comment(nameComment)
-        }
-        row("Domain:") {
-            textField()
-                .bindText(::domain)
-                .comment("e.g. sales, ffu, hub")
         }
         if (showPrefix) {
             row("Selector prefix:") {

@@ -9,16 +9,11 @@ class PluginSettingsConfigurable : BoundConfigurable("Angular/Nx Scaffolder") {
     override fun createPanel(): DialogPanel {
         val settings = PluginSettings.getInstance().state
         return panel {
-            group("Nx Library Defaults") {
+            group("General") {
                 row("Selector prefix:") {
                     textField()
                         .bindText(settings::selectorPrefix)
-                        .comment("e.g. app, sp-feature, ef")
-                }
-                row("Default domain:") {
-                    textField()
-                        .bindText(settings::nxDefaultDomain)
-                        .comment("e.g. sales, ffu, hub")
+                        .comment("Default component selector prefix")
                 }
             }
             group("Playwright E2E") {
@@ -29,7 +24,7 @@ class PluginSettingsConfigurable : BoundConfigurable("Angular/Nx Scaffolder") {
                 row("Domain prefix:") {
                     textField()
                         .bindText(settings::playwrightDomainPrefix)
-                        .comment("e.g. SAL, FFU")
+                        .comment("Tag prefix used in test describe blocks")
                 }
             }
         }

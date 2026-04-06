@@ -7,7 +7,5 @@ import { ${STORE_CLASS} } from '../store/${STORE_NAME}.store'
 export class ${FACADE_CLASS} {
 #if(${HAS_STORE} == "true")
   private readonly store = inject(${STORE_CLASS})
-
-  readonly brands = this.store.brands
 #end
 }
