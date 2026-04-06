@@ -39,10 +39,13 @@ class NewModelLibAction : BaseScaffoldAction() {
 
         val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
 
-        val file = runWriteAction {
+        val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
             ModelLibGenerator(project).generate(libRoot, name)
         }
-        if (file != null) openFileInEditor(e, file)
+        if (file != null) {
+            openFileInEditor(e, file)
+            showSuccessNotification(project, kebab, "model")
+        }
     }
 }

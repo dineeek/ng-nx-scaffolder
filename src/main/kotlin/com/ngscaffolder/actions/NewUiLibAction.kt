@@ -47,10 +47,13 @@ class NewUiLibAction : BaseScaffoldAction() {
 
         val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
 
-        val file = runWriteAction {
+        val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
             UiLibGenerator(project).generate(libRoot, name, prefix)
         }
-        if (file != null) openFileInEditor(e, file)
+        if (file != null) {
+            openFileInEditor(e, file)
+            showSuccessNotification(project, kebab, "UI")
+        }
     }
 }

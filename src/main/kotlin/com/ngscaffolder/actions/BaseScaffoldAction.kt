@@ -1,11 +1,13 @@
 package com.ngscaffolder.actions
 
-import com.intellij.ide.IdeView
+import com.intellij.notification.NotificationGroupManager
+import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.WriteAction
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
@@ -18,6 +20,8 @@ import com.ngscaffolder.generators.TestRunner
 import com.ngscaffolder.generators.WorkspaceTools
 
 abstract class BaseScaffoldAction : AnAction() {
+
+    private val log = Logger.getInstance(BaseScaffoldAction::class.java)
 
     override fun update(e: AnActionEvent) {
         val project = e.project
@@ -51,6 +55,36 @@ abstract class BaseScaffoldAction : AnAction() {
             result = action()
         }
         return result
+    }
+
+    protected fun runWithCleanup(project: Project, libRoot: VirtualFile, action: () -> VirtualFile?): VirtualFile? {
+        return try {
+            runWriteAction(action)
+        } catch (e: Exception) {
+            log.warn("Custom file generation failed, cleaning up: ${e.message}", e)
+            try {
+                WriteAction.runAndWait<Throwable> { libRoot.delete(this) }
+            } catch (deleteEx: Exception) {
+                log.warn("Failed to clean up lib directory: ${deleteEx.message}", deleteEx)
+            }
+            Messages.showErrorDialog(
+                project,
+                "Failed to generate custom files: ${e.message}\nThe library directory has been removed.",
+                "Generation Failed"
+            )
+            null
+        }
+    }
+
+    protected fun showSuccessNotification(project: Project, libName: String, libType: String) {
+        NotificationGroupManager.getInstance()
+            .getNotificationGroup("NgNxScaffolder.Notifications")
+            .createNotification(
+                "Library created",
+                "\"$libName\" $libType library generated successfully",
+                NotificationType.INFORMATION,
+            )
+            .notify(project)
     }
 
     protected fun findWorkspaceRoot(directory: VirtualFile): VirtualFile? {

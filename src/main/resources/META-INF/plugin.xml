@@ -19,6 +19,7 @@
                 displayName="Angular/Nx Scaffolder"
                 parentId="tools"/>
         <defaultLiveTemplates file="/liveTemplates/AngularNx.xml"/>
+        <notificationGroup id="NgNxScaffolder.Notifications" displayType="BALLOON"/>
     </extensions>
 
     <actions>

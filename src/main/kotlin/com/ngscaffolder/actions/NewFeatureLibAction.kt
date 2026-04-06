@@ -54,10 +54,13 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             isDialog = dialog.isDialog,
         )
 
-        val file = runWriteAction {
+        val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
             FeatureLibGenerator(project).generate(libRoot, options)
         }
-        if (file != null) openFileInEditor(e, file)
+        if (file != null) {
+            openFileInEditor(e, file)
+            showSuccessNotification(project, kebab, "feature")
+        }
     }
 }
