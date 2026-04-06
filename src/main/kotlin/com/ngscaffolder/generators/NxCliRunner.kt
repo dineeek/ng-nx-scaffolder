@@ -2,6 +2,10 @@ package com.ngscaffolder.generators
 
 import com.intellij.execution.configurations.GeneralCommandLine
 import com.intellij.execution.process.CapturingProcessHandler
+import com.intellij.execution.process.ProcessEvent
+import com.intellij.execution.process.ProcessListener
+import com.intellij.openapi.progress.ProgressIndicator
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.vfs.VirtualFile
 
 data class NxResult(val success: Boolean, val output: String)
@@ -55,7 +59,7 @@ class NxCliRunner {
         return when {
             hasVitest && !hasJest -> TestRunner.VITEST
             hasJest && !hasVitest -> TestRunner.JEST
-            hasVitest && hasJest -> TestRunner.JEST // both present, prefer jest (more common in Angular)
+            hasVitest && hasJest -> TestRunner.JEST
             else -> TestRunner.NONE
         }
     }
@@ -64,6 +68,7 @@ class NxCliRunner {
         workspaceRoot: VirtualFile,
         generator: String,
         args: List<String>,
+        indicator: ProgressIndicator? = null,
     ): NxResult {
         val allArgs = mutableListOf("nx", "generate", generator)
         allArgs.addAll(args)
@@ -77,6 +82,16 @@ class NxCliRunner {
 
         return try {
             val handler = CapturingProcessHandler(commandLine)
+            if (indicator != null) {
+                handler.addProcessListener(object : ProcessListener {
+                    override fun onTextAvailable(event: ProcessEvent, outputType: Key<*>) {
+                        val text = event.text.trim()
+                        if (text.isNotEmpty()) {
+                            indicator.text2 = text
+                        }
+                    }
+                })
+            }
             val result = handler.runProcess(120_000)
             NxResult(
                 success = result.exitCode == 0,

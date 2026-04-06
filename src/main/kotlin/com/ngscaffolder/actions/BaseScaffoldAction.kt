@@ -9,6 +9,7 @@ import com.intellij.openapi.actionSystem.LangDataKeys
 import com.intellij.openapi.application.WriteAction
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.ProgressManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.Messages
@@ -131,7 +132,12 @@ abstract class BaseScaffoldAction : AnAction() {
     ): NxResult? {
         var nxResult: NxResult? = null
         val completed = ProgressManager.getInstance().runProcessWithProgressSynchronously(
-            { nxResult = NxCliRunner().runGenerate(workspaceRoot, generator, args) },
+            {
+                val indicator = ProgressManager.getInstance().progressIndicator
+                indicator?.isIndeterminate = true
+                indicator?.text = "Running nx generate..."
+                nxResult = NxCliRunner().runGenerate(workspaceRoot, generator, args, indicator)
+            },
             "Running nx generate...",
             true,
             project,
@@ -148,7 +154,12 @@ abstract class BaseScaffoldAction : AnAction() {
         val dryRunArgs = args + "--dry-run"
         var nxResult: NxResult? = null
         val completed = ProgressManager.getInstance().runProcessWithProgressSynchronously(
-            { nxResult = NxCliRunner().runGenerate(workspaceRoot, generator, dryRunArgs) },
+            {
+                val indicator = ProgressManager.getInstance().progressIndicator
+                indicator?.isIndeterminate = true
+                indicator?.text = "Previewing changes..."
+                nxResult = NxCliRunner().runGenerate(workspaceRoot, generator, dryRunArgs, indicator)
+            },
             "Previewing changes...",
             true,
             project,

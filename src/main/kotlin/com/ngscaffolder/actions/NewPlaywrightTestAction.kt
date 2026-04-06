@@ -1,6 +1,7 @@
 package com.ngscaffolder.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.ui.Messages
 import com.ngscaffolder.dialogs.PlaywrightTestDialog
 import com.ngscaffolder.generators.PlaywrightTestGenerator
 
@@ -17,8 +18,22 @@ class NewPlaywrightTestAction : BaseScaffoldAction() {
         val testCaseName = dialog.testCaseName.trim()
         if (featureName.isEmpty() || testCaseName.isEmpty()) return
 
-        runWriteAction {
-            PlaywrightTestGenerator(project).generate(directory, featureName, testCaseName)
+        val file = try {
+            runWriteAction {
+                PlaywrightTestGenerator(project).generate(directory, featureName, testCaseName)
+            }
+        } catch (ex: Exception) {
+            Messages.showErrorDialog(
+                project,
+                "Failed to generate Playwright test: ${ex.message}",
+                "Generation Failed"
+            )
+            null
+        }
+
+        if (file != null) {
+            openFileInEditor(e, file)
+            showSuccessNotification(project, "feature-$featureName", "Playwright E2E")
         }
     }
 }
