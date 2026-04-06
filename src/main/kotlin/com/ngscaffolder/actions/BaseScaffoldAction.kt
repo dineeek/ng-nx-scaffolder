@@ -18,6 +18,7 @@ import com.ngscaffolder.generators.NxCliRunner
 import com.ngscaffolder.generators.NxResult
 import com.ngscaffolder.generators.TestRunner
 import com.ngscaffolder.generators.WorkspaceTools
+import com.ngscaffolder.settings.PluginSettings
 
 abstract class BaseScaffoldAction : AnAction() {
 
@@ -118,6 +119,10 @@ abstract class BaseScaffoldAction : AnAction() {
         return args
     }
 
+    protected fun getConfiguredGenerator(): String {
+        return PluginSettings.getInstance().state.nxGenerator
+    }
+
     protected fun runNxGenerate(
         project: Project,
         workspaceRoot: VirtualFile,
@@ -132,6 +137,40 @@ abstract class BaseScaffoldAction : AnAction() {
             project,
         )
         return if (completed) nxResult else null
+    }
+
+    protected fun runNxDryRun(
+        project: Project,
+        workspaceRoot: VirtualFile,
+        generator: String,
+        args: List<String>,
+    ): NxResult? {
+        val dryRunArgs = args + "--dry-run"
+        var nxResult: NxResult? = null
+        val completed = ProgressManager.getInstance().runProcessWithProgressSynchronously(
+            { nxResult = NxCliRunner().runGenerate(workspaceRoot, generator, dryRunArgs) },
+            "Previewing changes...",
+            true,
+            project,
+        )
+        return if (completed) nxResult else null
+    }
+
+    protected fun showDryRunPreview(project: Project, output: String): Boolean {
+        val lines = output.lines()
+            .filter { it.startsWith("CREATE") || it.startsWith("UPDATE") }
+            .joinToString("\n")
+            .ifBlank { output.take(2000) }
+
+        val choice = Messages.showOkCancelDialog(
+            project,
+            "The following files will be created by Nx:\n\n$lines",
+            "Preview: nx generate",
+            "Generate",
+            "Cancel",
+            Messages.getInformationIcon(),
+        )
+        return choice == Messages.OK
     }
 
     protected fun showNxError(project: Project, result: NxResult?) {

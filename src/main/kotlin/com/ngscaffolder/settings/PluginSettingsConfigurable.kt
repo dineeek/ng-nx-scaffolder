@@ -15,6 +15,11 @@ class PluginSettingsConfigurable : BoundConfigurable("Angular/Nx Scaffolder") {
                         .bindText(settings::selectorPrefix)
                         .comment("Default component selector prefix")
                 }
+                row("Nx generator:") {
+                    textField()
+                        .bindText(settings::nxGenerator)
+                        .comment("e.g. @nx/angular:library or a custom workspace generator")
+                }
             }
             group("Playwright E2E") {
                 row("Fixture type:") {

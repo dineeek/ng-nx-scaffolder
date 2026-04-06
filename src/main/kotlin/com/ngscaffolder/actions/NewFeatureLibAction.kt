@@ -28,6 +28,7 @@ class NewFeatureLibAction : BaseScaffoldAction() {
 
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
+        val generator = getConfiguredGenerator()
         val nxArgs = buildNxArgs(
             name = kebab,
             relativePath = relativePath,
@@ -36,7 +37,14 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             tools = tools,
         )
 
-        val result = runNxGenerate(project, workspaceRoot, "@nx/angular:library", nxArgs)
+        val preview = runNxDryRun(project, workspaceRoot, generator, nxArgs)
+        if (preview == null || !preview.success) {
+            showNxError(project, preview)
+            return
+        }
+        if (!showDryRunPreview(project, preview.output)) return
+
+        val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
             showNxError(project, result)
             return

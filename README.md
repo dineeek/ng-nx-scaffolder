@@ -1,6 +1,24 @@
 # ng-nx-scaffolder
 
-IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Generates complete file structures following standard Angular and Nx conventions.
+IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Uses `nx generate` under the hood to create the library structure, then adds Angular architectural patterns on top.
+
+## Requirements
+
+- IntelliJ IDEA Ultimate 2024.1+ or WebStorm 2024.1+
+- Java 17+
+- **Nx 16+** workspace with `@nx/angular` installed
+- Node.js with `npx` available in PATH
+
+## How It Works
+
+1. You select a lib type and fill in the dialog (name, prefix, options)
+2. Plugin auto-detects workspace tools (ESLint, Jest/Vitest, Stylelint, Prettier)
+3. **Dry-run preview** shows which files Nx will create — you confirm before proceeding
+4. Plugin runs `nx generate @nx/angular:library` to create the lib scaffold (all config files)
+5. Plugin replaces the default component with the architectural pattern you selected
+6. Success notification with the lib name
+
+All config files (tsconfig, jest/vitest, eslint, project.json, etc.) come directly from Nx — no hardcoded templates.
 
 ## Features
 
@@ -22,81 +40,21 @@ Generates a full feature lib with a container component and optional architectur
 
 Always generates: container component (`.ts`, `.html`, `.scss`, `.spec.ts`), mapper, models folder, barrel `index.ts`.
 
-```
-src/
-├── index.ts
-└── lib/
-    ├── container/
-    │   ├── {name}-container.component.ts
-    │   ├── {name}-container.component.html
-    │   ├── {name}-container.component.scss
-    │   └── {name}-container.component.spec.ts
-    ├── store/                          # if store enabled
-    │   ├── {name}.store.ts
-    │   ├── {name}.state.ts
-    │   └── {name}.store.spec.ts
-    ├── facade/                         # if facade enabled
-    │   ├── {name}-facade.service.ts
-    │   └── {name}-facade.service.spec.ts
-    ├── form/                           # if form enabled
-    │   ├── {name}-form.service.ts
-    │   ├── {name}-form.model.ts
-    │   └── {name}-form.service.spec.ts
-    ├── mapper/
-    │   ├── {name}.mapper.ts
-    │   └── {name}.mapper.spec.ts
-    ├── models/
-    │   └── example.model.ts
-    └── {name}.routes.ts                # if routing enabled
-```
-
 #### Data-Access Library
 
-Generates an Angular service with `HttpClient` injection:
-
-```
-src/
-├── index.ts
-└── lib/services/
-    ├── {name}.service.ts
-    └── {name}.service.spec.ts
-```
+Generates an Angular service with `HttpClient` injection + spec.
 
 #### Model Library
 
-Generates a TypeScript interface file:
-
-```
-src/
-├── index.ts
-└── lib/models/
-    └── {name}.model.ts
-```
+Generates a TypeScript interface file with barrel export.
 
 #### UI Library
 
-Generates a standalone Angular component:
-
-```
-src/
-├── index.ts
-└── lib/example/
-    ├── example.component.ts
-    ├── example.component.html
-    └── example.component.scss
-```
+Generates a standalone Angular component (OnPush, signals) with barrel export.
 
 #### Util Library
 
-Generates a utility file with spec:
-
-```
-src/
-├── index.ts
-└── lib/{name}/
-    ├── {name}.util.ts
-    └── {name}.util.spec.ts
-```
+Generates a utility file with spec and barrel export.
 
 ### Playwright E2E Test Generator
 
@@ -130,6 +88,18 @@ Type the abbreviation in any `.ts` file and press Tab:
 | `tstep` | `await test.step('...', async () => { })` |
 | `tcase` | Playwright test case function with Fixtures |
 
+## Workspace Auto-Detection
+
+The plugin automatically detects your workspace configuration:
+
+| Tool | Detection method | Effect |
+|-|-|-|
+| ESLint | `.eslintrc.*` or `eslint.config.*` at workspace root | `--linter=none` if absent |
+| Jest | `jest.config.*` or `jest.preset.*` at workspace root | `--unitTestRunner=jest` |
+| Vitest | `vitest.config.*` or `vitest.workspace.*` at workspace root | `--unitTestRunner=vitest` |
+| Stylelint | `.stylelintrc.*` at workspace root | Detected for reference |
+| Prettier | `.prettierrc*` at workspace root | Detected for reference |
+
 ## Settings
 
 **Settings > Tools > Angular/Nx Scaffolder**
@@ -137,13 +107,9 @@ Type the abbreviation in any `.ts` file and press Tab:
 | Setting | Default | Description |
 |-|-|-|
 | Selector prefix | `app` | Component selector prefix |
+| Nx generator | `@nx/angular:library` | Generator command (override for custom workspace generators) |
 | Playwright fixture type | `Fixtures` | Type name for E2E test fixtures |
 | Playwright domain prefix | _(empty)_ | Tag prefix in test describe blocks |
-
-## Requirements
-
-- IntelliJ IDEA Ultimate 2024.1+ or WebStorm 2024.1+
-- Java 17+
 
 ## Development
 
@@ -158,8 +124,6 @@ Type the abbreviation in any `.ts` file and press Tab:
 ```bash
 ./gradlew runIde
 ```
-
-Launches a sandboxed IntelliJ instance with the plugin loaded for manual testing.
 
 ### Run tests
 
@@ -191,22 +155,6 @@ Produces `build/distributions/ng-nx-scaffolder-{version}.zip`.
 ```
 
 Requires `ORG_GRADLE_PROJECT_intellijPublishToken` environment variable.
-
-## Project Structure
-
-```
-src/main/
-├── kotlin/com/ngscaffolder/
-│   ├── actions/          # Menu actions
-│   ├── dialogs/          # Input dialogs
-│   ├── generators/       # File generation logic
-│   ├── settings/         # Plugin configuration
-│   └── util/             # NamingUtils (kebab/Pascal/camel case)
-└── resources/
-    ├── META-INF/plugin.xml
-    ├── fileTemplates/internal/   # Velocity templates
-    └── liveTemplates/AngularNx.xml
-```
 
 ## License
 
