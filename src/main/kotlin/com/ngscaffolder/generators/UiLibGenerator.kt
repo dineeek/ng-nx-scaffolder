@@ -3,14 +3,12 @@ package com.ngscaffolder.generators
 import com.intellij.ide.fileTemplates.FileTemplateManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.ngscaffolder.util.NamingUtils
 import java.util.*
 
 class UiLibGenerator(private val project: Project) {
 
+    @Suppress("UNUSED_PARAMETER")
     fun generate(libRoot: VirtualFile, name: String, prefix: String): VirtualFile {
-        val kebab = NamingUtils.toKebabCase(name)
-
         val props = Properties().apply {
             setProperty("PREFIX", prefix)
         }

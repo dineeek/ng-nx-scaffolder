@@ -1,5 +1,8 @@
 # ng-nx-scaffolder
 
+![Build](https://github.com/dineeek/ng-nx-scaffolder/actions/workflows/ci.yml/badge.svg)
+![License](https://img.shields.io/github/license/dineeek/ng-nx-scaffolder)
+
 IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Uses `nx generate` under the hood to create the library structure, then adds Angular architectural patterns on top.
 
 ## Requirements

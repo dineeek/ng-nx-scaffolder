@@ -54,9 +54,9 @@ class PlaywrightTestGenerator(private val project: Project) {
         val pageTemplate = templateManager.getInternalTemplate("Playwright Page")
         createFile(pagesDir, "$featureKebab.page.ts", pageTemplate.getText(props))
 
-        createFile(pagesDir, "index.ts",
-            "export { ${featurePascal}Page } from './$featureKebab.page';\nexport { ${featurePascal.uppercase()}_IDS, LOCATORS } from './$featureKebab.locators';\n"
-        )
+        val pageExport = "export { ${featurePascal}Page } from './$featureKebab.page';"
+        val locatorExport = "export { ${featurePascal.uppercase()}_IDS, LOCATORS } from './$featureKebab.locators';"
+        createFile(pagesDir, "index.ts", "$pageExport\n$locatorExport\n")
 
         return featureDir
     }
