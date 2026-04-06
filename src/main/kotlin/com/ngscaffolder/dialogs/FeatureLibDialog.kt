@@ -33,6 +33,24 @@ class FeatureLibDialog : DialogWrapper(true) {
                 .focused()
                 .comment("e.g. user-profile, checkout, order-details")
                 .also { nameField = it.component }
+                .validationOnInput {
+                    val name = it.text.trim()
+                    when {
+                        name.isEmpty() -> ValidationInfo("Name is required", it)
+                        !name.matches(Regex("^[a-z][a-z0-9-]*$")) ->
+                            ValidationInfo("Name must be kebab-case (e.g. my-feature)", it)
+                        else -> null
+                    }
+                }
+                .validationOnApply {
+                    val name = it.text.trim()
+                    when {
+                        name.isEmpty() -> ValidationInfo("Name is required", it)
+                        !name.matches(Regex("^[a-z][a-z0-9-]*$")) ->
+                            ValidationInfo("Name must be kebab-case (e.g. my-feature)", it)
+                        else -> null
+                    }
+                }
         }
         row("Selector prefix:") {
             textField()
@@ -60,16 +78,5 @@ class FeatureLibDialog : DialogWrapper(true) {
                 .bindSelected(::isDialog)
                 .comment("Wraps container in a dialog with MAT_DIALOG_DATA")
         }
-    }
-
-    override fun doValidate(): ValidationInfo? {
-        val name = nameField.text.trim()
-        if (name.isEmpty()) {
-            return ValidationInfo("Name is required", nameField)
-        }
-        if (!name.matches(Regex("^[a-z][a-z0-9-]*$"))) {
-            return ValidationInfo("Name must be kebab-case (e.g. my-feature)", nameField)
-        }
-        return null
     }
 }
