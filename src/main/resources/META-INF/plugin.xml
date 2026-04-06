@@ -5,8 +5,7 @@
     <description><![CDATA[
         Code generation plugin for Angular and Nx developers.
         Generates feature libraries (with store/facade/form/dialog/routing),
-        data-access services, model interfaces, UI components, utility files,
-        and Playwright E2E tests.
+        data-access services, model interfaces, UI components, and utility files.
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>
@@ -48,11 +47,13 @@
                     text="Util Library"
                     description="Generate a util lib with utility file"/>
 
+            <!-- Playwright E2E testing — planned for next version
             <separator text="E2E Testing"/>
             <action id="NgNxScaffolder.NewPlaywrightTest"
                     class="com.ngscaffolder.actions.NewPlaywrightTestAction"
                     text="Playwright E2E Test"
                     description="Generate Playwright E2E test with POM"/>
+            -->
         </group>
     </actions>
 </idea-plugin>

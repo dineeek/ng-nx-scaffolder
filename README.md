@@ -56,23 +56,6 @@ Generates a standalone Angular component (OnPush, signals) with barrel export.
 
 Generates a utility file with spec and barrel export.
 
-### Playwright E2E Test Generator
-
-Generates a complete feature test folder with Page Object Model:
-
-```
-feature-{name}/
-├── cycles/
-│   └── all.spec.ts
-├── tests/
-│   ├── {test-name}.ts
-│   └── index.ts
-└── pages/
-    ├── {name}.locators.ts
-    ├── {name}.page.ts
-    └── index.ts
-```
-
 ### Live Templates
 
 Type the abbreviation in any `.ts` file and press Tab:
@@ -108,8 +91,6 @@ The plugin automatically detects your workspace configuration:
 |-|-|-|
 | Selector prefix | `app` | Component selector prefix |
 | Nx generator | `@nx/angular:library` | Generator command (override for custom workspace generators) |
-| Playwright fixture type | `Fixtures` | Type name for E2E test fixtures |
-| Playwright domain prefix | _(empty)_ | Tag prefix in test describe blocks |
 
 ## Development
 

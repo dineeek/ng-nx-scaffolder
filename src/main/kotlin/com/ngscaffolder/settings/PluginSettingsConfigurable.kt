@@ -21,17 +21,18 @@ class PluginSettingsConfigurable : BoundConfigurable("Angular/Nx Scaffolder") {
                         .comment("e.g. @nx/angular:library or a custom workspace generator")
                 }
             }
-            group("Playwright E2E") {
-                row("Fixture type:") {
-                    textField()
-                        .bindText(settings::playwrightFixtureType)
-                }
-                row("Domain prefix:") {
-                    textField()
-                        .bindText(settings::playwrightDomainPrefix)
-                        .comment("Tag prefix used in test describe blocks")
-                }
-            }
+            // Playwright E2E settings — planned for next version
+            // group("Playwright E2E") {
+            //     row("Fixture type:") {
+            //         textField()
+            //             .bindText(settings::playwrightFixtureType)
+            //     }
+            //     row("Domain prefix:") {
+            //         textField()
+            //             .bindText(settings::playwrightDomainPrefix)
+            //             .comment("Tag prefix used in test describe blocks")
+            //     }
+            // }
         }
     }
 }
