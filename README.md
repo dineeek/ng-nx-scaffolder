@@ -1,7 +1,14 @@
+<p align="center">
+  <img src="assets/screenshots/logo/ng-nx-scaffolder.png" alt="ng-nx-scaffolder" width="120" />
+</p>
+
 # ng-nx-scaffolder
 
 ![Build](https://github.com/dineeek/ng-nx-scaffolder/actions/workflows/ci.yml/badge.svg)
+![Release](https://img.shields.io/github/v/release/dineeek/ng-nx-scaffolder)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.0-blue)
+![IntelliJ](https://img.shields.io/badge/IntelliJ-2024.1+-purple)
 
 IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Uses `nx generate` under the hood to create the library structure, then adds Angular architectural patterns on top.
 
@@ -9,6 +16,7 @@ IntelliJ / WebStorm plugin for scaffolding Angular and Nx libraries. Uses `nx ge
 
 - IntelliJ IDEA Ultimate 2024.1+ or WebStorm 2024.1+
 - Java 17+
+- **Angular 17+** — generated code uses standalone components, `inject()`, and `@ngrx/signals` signalStore
 - **Nx 16+** workspace with `@nx/angular` installed
 - Node.js with `npx` available in PATH
 
@@ -27,7 +35,11 @@ All config files (tsconfig, jest/vitest, eslint, project.json, etc.) come direct
 
 ### Nx Library Generators
 
-Access via **Right-click > New > Angular/Nx** or **File > New > Angular/Nx**.
+Access via **Right-click > New > ng-nx-scaffolder** or **File > New > ng-nx-scaffolder**.
+
+![Menu Actions](assets/screenshots/menu/menu-actions.png)
+
+---
 
 #### Feature Library
 
@@ -39,25 +51,79 @@ Generates a full feature lib with a container component and optional architectur
 | Facade | off | `facade/{name}-facade.service.ts` + spec — abstraction layer over store |
 | Form | off | `form/{name}-form.service.ts`, `{name}-form.model.ts` + spec — typed reactive form |
 | Routing | off | `{name}.routes.ts` — Angular route config |
-| Dialog | off | Dialog variant of container with `MAT_DIALOG_DATA` + response/data interfaces |
 
 Always generates: container component (`.ts`, `.html`, `.scss`, `.spec.ts`), mapper, models folder, barrel `index.ts`.
 
-#### Data-Access Library
+<details>
+<summary>Screenshots</summary>
+
+| Create | Preview | Generated |
+|-|-|-|
+| ![Create](assets/screenshots/feature/create.png) | ![Preview](assets/screenshots/feature/preview.png) | ![Generated](assets/screenshots/feature/generated.png) |
+
+</details>
+
+---
+
+#### Data Access Library
 
 Generates an Angular service with `HttpClient` injection + spec.
+
+<details>
+<summary>Screenshots</summary>
+
+| Create | Preview | Generated |
+|-|-|-|
+| ![Create](assets/screenshots/data-access/create.png) | ![Preview](assets/screenshots/data-access/preview.png) | ![Generated](assets/screenshots/data-access/generated.png) |
+
+</details>
+
+---
 
 #### Model Library
 
 Generates a TypeScript interface file with barrel export.
 
+<details>
+<summary>Screenshots</summary>
+
+| Create | Preview | Generated |
+|-|-|-|
+| ![Create](assets/screenshots/model/create.png) | ![Preview](assets/screenshots/model/preview.png) | ![Generated](assets/screenshots/model/generated.png) |
+
+</details>
+
+---
+
 #### UI Library
 
 Generates a standalone Angular component (OnPush, signals) with barrel export.
 
+<details>
+<summary>Screenshots</summary>
+
+| Create | Preview | Generated |
+|-|-|-|
+| ![Create](assets/screenshots/ui/create.png) | ![Preview](assets/screenshots/ui/generate.png) | ![Generated](assets/screenshots/ui/generated.png) |
+
+</details>
+
+---
+
 #### Util Library
 
 Generates a utility file with spec and barrel export.
+
+<details>
+<summary>Screenshots</summary>
+
+| Create | Preview | Generated |
+|-|-|-|
+| ![Create](assets/screenshots/util/create.png) | ![Preview](assets/screenshots/util/preview.png) | ![Generated](assets/screenshots/util/generated.png) |
+
+</details>
+
+---
 
 ### Live Templates
 

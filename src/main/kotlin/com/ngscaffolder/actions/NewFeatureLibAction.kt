@@ -1,16 +1,27 @@
 package com.ngscaffolder.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.vfs.VfsUtil
 import com.ngscaffolder.dialogs.FeatureLibDialog
+import com.ngscaffolder.dialogs.PreviewEntry
 import com.ngscaffolder.generators.FeatureLibGenerator
 import com.ngscaffolder.generators.FeatureLibOptions
 import com.ngscaffolder.util.NamingUtils
 
 class NewFeatureLibAction : BaseScaffoldAction() {
 
+    @Suppress("CyclomaticComplexMethod", "ReturnCount")
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val directory = getTargetDirectory(e) ?: return
+
+        val workspaceRoot = findWorkspaceRoot(directory)
+        if (workspaceRoot == null) {
+            showNxNotFound(project)
+            return
+        }
+        if (!validateTargetDirectory(project, workspaceRoot, directory)) return
+        val scope = detectNpmScope(workspaceRoot)
 
         val dialog = FeatureLibDialog()
         if (!dialog.showAndGet()) return
@@ -18,14 +29,12 @@ class NewFeatureLibAction : BaseScaffoldAction() {
         val name = dialog.libName.trim()
         if (name.isEmpty()) return
 
-        val kebab = NamingUtils.toKebabCase(name)
+        val effectiveName = dialog.getEffectiveName()
+        val kebab = NamingUtils.toKebabCase(effectiveName)
+        val inputKebab = NamingUtils.toKebabCase(name)
+        if (libAlreadyExists(project, directory, kebab)) return
         val prefix = dialog.prefix.trim()
-        val workspaceRoot = findWorkspaceRoot(directory)
-        if (workspaceRoot == null) {
-            showNxNotFound(project)
-            return
-        }
-
+        val importPath = scope?.let { "$it/$kebab" } ?: kebab
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
         val generator = getConfiguredGenerator()
@@ -35,14 +44,51 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             prefix = prefix,
             style = "scss",
             tools = tools,
+            publishable = dialog.publishable,
+            importPath = importPath,
         )
+
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
 
         val preview = runNxDryRun(project, workspaceRoot, generator, nxArgs)
         if (preview == null || !preview.success) {
             showNxError(project, preview)
             return
         }
-        if (!showDryRunPreview(project, preview.output)) return
+        val parsed = parseDryRunOutput(preview.output)
+        val nxLibRoot = extractLibRoot(parsed) ?: relativePath
+
+        val containerName = "$inputKebab-container"
+        val customEntries = mutableListOf(
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.html"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.scss"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$inputKebab.mapper.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$inputKebab.mapper.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/models/example.model.ts"),
+            PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
+        )
+        if (dialog.hasStore) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$inputKebab.store.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$inputKebab.state.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$inputKebab.store.spec.ts"))
+        }
+        if (dialog.hasFacade) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$inputKebab-facade.service.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$inputKebab-facade.service.spec.ts"))
+        }
+        if (dialog.hasForm) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$inputKebab-form.service.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$inputKebab-form.model.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$inputKebab-form.service.spec.ts"))
+        }
+        if (dialog.hasRouting) {
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab.routes.ts"))
+        }
+
+        val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + customEntries
+        if (!showTreePreview(project, flatEntries)) return
 
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
@@ -50,7 +96,12 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             return
         }
 
-        val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
+        VfsUtil.markDirtyAndRefresh(false, true, true, directory, workspaceRoot)
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
+            restoreWorkspaceFiles(workspaceRoot, snapshot)
+        }
+        val libRoot = refreshAndFindLibByPath(workspaceRoot, relativePath) ?: return
 
         val options = FeatureLibOptions(
             name = name,
@@ -58,12 +109,12 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             hasStore = dialog.hasStore,
             hasFacade = dialog.hasFacade,
             hasForm = dialog.hasForm,
-            hasRouting = dialog.hasRouting && !dialog.isDialog,
-            isDialog = dialog.isDialog,
+            hasRouting = dialog.hasRouting,
         )
 
         val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
+            fixTestSetup(libRoot)
             FeatureLibGenerator(project).generate(libRoot, options)
         }
         if (file != null) {

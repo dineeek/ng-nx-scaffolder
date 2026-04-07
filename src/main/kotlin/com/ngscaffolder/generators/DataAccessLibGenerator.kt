@@ -21,17 +21,17 @@ class DataAccessLibGenerator(private val project: Project) {
 
         val srcDir = libRoot.findChild("src")!!
         val libDir = srcDir.findChild("lib")!!
-        val servicesDir = libDir.createChildDirectory(this, "services")
+        val serviceDir = libDir.createChildDirectory(this, kebab)
 
         val serviceTpl = templateManager.getInternalTemplate("Data Access Service")
-        createFile(servicesDir, "$kebab.service.ts", serviceTpl.getText(props))
+        createFile(serviceDir, "$kebab.service.ts", serviceTpl.getText(props))
 
         val specTpl = templateManager.getInternalTemplate("Data Access Service Spec")
-        createFile(servicesDir, "$kebab.service.spec.ts", specTpl.getText(props))
+        createFile(serviceDir, "$kebab.service.spec.ts", specTpl.getText(props))
 
-        overwriteFile(srcDir, "index.ts", "export { ${className}Service } from './lib/services/$kebab.service'\n")
+        overwriteFile(srcDir, "index.ts", "export { ${className}Service } from './lib/$kebab/$kebab.service'\n")
 
-        return servicesDir.findChild("$kebab.service.ts")!!
+        return serviceDir.findChild("$kebab.service.ts")!!
     }
 
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {

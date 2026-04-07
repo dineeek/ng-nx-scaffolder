@@ -13,17 +13,23 @@ class FeatureLibDialog : DialogWrapper(true) {
 
     var libName: String = ""
     var prefix: String = settings.selectorPrefix
+    var addTypeSuffix: Boolean = true
     var hasStore: Boolean = true
     var hasFacade: Boolean = false
     var hasForm: Boolean = false
     var hasRouting: Boolean = false
-    var isDialog: Boolean = false
+    var publishable: Boolean = false
 
     private lateinit var nameField: JTextField
 
     init {
         title = "New Feature Library"
         init()
+    }
+
+    fun getEffectiveName(): String {
+        val name = libName.trim()
+        return if (addTypeSuffix) "$name-feature" else name
     }
 
     override fun createCenterPanel(): JComponent = panel {
@@ -33,10 +39,39 @@ class FeatureLibDialog : DialogWrapper(true) {
                 .focused()
                 .comment("e.g. user-profile, checkout, order-details")
                 .also { nameField = it.component }
+                .validationOnInput {
+                    val name = it.text.trim()
+                    when {
+                        name.isEmpty() -> ValidationInfo("Name is required", it)
+                        !name.matches(Regex("^[a-z][a-z0-9-]*$")) ->
+                            ValidationInfo("Name must be kebab-case (e.g. my-feature)", it)
+                        else -> null
+                    }
+                }
+                .validationOnApply {
+                    val name = it.text.trim()
+                    when {
+                        name.isEmpty() -> ValidationInfo("Name is required", it)
+                        !name.matches(Regex("^[a-z][a-z0-9-]*$")) ->
+                            ValidationInfo("Name must be kebab-case (e.g. my-feature)", it)
+                        else -> null
+                    }
+                }
         }
         row("Selector prefix:") {
             textField()
                 .bindText(::prefix)
+        }
+        row {
+            checkBox("Add type suffix (-feature)")
+                .bindSelected(::addTypeSuffix)
+                .comment("Library folder will be named e.g. user-profile-feature")
+        }
+        separator()
+        row {
+            checkBox("Publishable")
+                .bindSelected(::publishable)
+                .comment("Allow library to be published to npm registry")
         }
         separator()
         row {
@@ -55,21 +90,5 @@ class FeatureLibDialog : DialogWrapper(true) {
             checkBox("Routing")
                 .bindSelected(::hasRouting)
         }
-        row {
-            checkBox("Dialog component")
-                .bindSelected(::isDialog)
-                .comment("Wraps container in a dialog with MAT_DIALOG_DATA")
-        }
-    }
-
-    override fun doValidate(): ValidationInfo? {
-        val name = nameField.text.trim()
-        if (name.isEmpty()) {
-            return ValidationInfo("Name is required", nameField)
-        }
-        if (!name.matches(Regex("^[a-z][a-z0-9-]*$"))) {
-            return ValidationInfo("Name must be kebab-case (e.g. my-feature)", nameField)
-        }
-        return null
     }
 }

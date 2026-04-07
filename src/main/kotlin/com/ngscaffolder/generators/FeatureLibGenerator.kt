@@ -13,7 +13,6 @@ data class FeatureLibOptions(
     val hasFacade: Boolean,
     val hasForm: Boolean,
     val hasRouting: Boolean,
-    val isDialog: Boolean,
 )
 
 class FeatureLibGenerator(private val project: Project) {
@@ -41,10 +40,6 @@ class FeatureLibGenerator(private val project: Project) {
 
         val routesConst = "${className.uppercase()}_ROUTES"
 
-        val dialogModelName = "$kebab-dialog"
-        val dialogDataInterface = "I${className}DialogData"
-        val dialogResponseInterface = "I${className}DialogResponse"
-
         val props = Properties().apply {
             setProperty("PREFIX", options.prefix)
             setProperty("COMPONENT_NAME", componentName)
@@ -60,9 +55,6 @@ class FeatureLibGenerator(private val project: Project) {
             setProperty("MAPPER_NAME", mapperName)
             setProperty("MAPPER_CLASS", mapperClass)
             setProperty("ROUTES_CONST", routesConst)
-            setProperty("DIALOG_MODEL_NAME", dialogModelName)
-            setProperty("DIALOG_DATA_INTERFACE", dialogDataInterface)
-            setProperty("DIALOG_RESPONSE_INTERFACE", dialogResponseInterface)
             setProperty("HAS_STORE", options.hasStore.toString())
             setProperty("HAS_FACADE", options.hasFacade.toString())
             setProperty("HAS_FORM", options.hasForm.toString())
@@ -75,13 +67,8 @@ class FeatureLibGenerator(private val project: Project) {
 
         // Container
         val containerDir = libDir.createChildDirectory(this, "container")
-        if (options.isDialog) {
-            val tpl = templateManager.getInternalTemplate("Feature Container Dialog Component")
-            createFile(containerDir, "$componentName.component.ts", tpl.getText(props))
-        } else {
-            val tpl = templateManager.getInternalTemplate("Feature Container Component")
-            createFile(containerDir, "$componentName.component.ts", tpl.getText(props))
-        }
+        val tpl = templateManager.getInternalTemplate("Feature Container Component")
+        createFile(containerDir, "$componentName.component.ts", tpl.getText(props))
         val htmlTpl = templateManager.getInternalTemplate("Feature Container Component HTML")
         createFile(containerDir, "$componentName.component.html", htmlTpl.getText(props))
         createFile(containerDir, "$componentName.component.scss", "")
@@ -131,25 +118,16 @@ class FeatureLibGenerator(private val project: Project) {
         val exampleModelTpl = templateManager.getInternalTemplate("Feature Example Model")
         createFile(modelsDir, "example.model.ts", exampleModelTpl.getText(props))
 
-        // Dialog model (conditional)
-        if (options.isDialog) {
-            val dialogModelTpl = templateManager.getInternalTemplate("Feature Dialog Model")
-            createFile(modelsDir, "$dialogModelName.model.ts", dialogModelTpl.getText(props))
-        }
-
         // Routing (conditional)
-        if (options.hasRouting && !options.isDialog) {
+        if (options.hasRouting) {
             val routesTpl = templateManager.getInternalTemplate("Feature Routes")
             createFile(libDir, "${kebab}.routes.ts", routesTpl.getText(props))
         }
 
         // Barrel export (overwrite nx default)
         val barrelLines = mutableListOf("export * from './lib/container/$componentName.component'")
-        if (options.hasRouting && !options.isDialog) {
+        if (options.hasRouting) {
             barrelLines.add("export * from './lib/${kebab}.routes'")
-        }
-        if (options.isDialog) {
-            barrelLines.add("export * from './lib/models/$dialogModelName.model'")
         }
         overwriteFile(srcDir, "index.ts", barrelLines.joinToString("\n") + "\n")
 

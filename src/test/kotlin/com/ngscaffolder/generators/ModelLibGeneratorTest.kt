@@ -23,9 +23,9 @@ class ModelLibGeneratorTest : BasePlatformTestCase() {
             ModelLibGenerator(project).generate(libRoot, "vehicle")
         }
 
-        val models = libRoot.findChild("src")!!.findChild("lib")!!.findChild("models")
-        assertNotNull(models)
-        assertNotNull(models!!.findChild("vehicle.model.ts"))
+        val modelDir = libRoot.findChild("src")!!.findChild("lib")!!.findChild("vehicle")
+        assertNotNull(modelDir)
+        assertNotNull(modelDir!!.findChild("vehicle.model.ts"))
     }
 
     fun `test overwrites index with interface export`() {
