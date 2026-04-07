@@ -1,1 +1,1 @@
-<p>example works!</p>
+<p>${FILE_NAME} works!</p>

@@ -1,3 +1,0 @@
-export interface ${DIALOG_DATA_INTERFACE} {}
-
-export interface ${DIALOG_RESPONSE_INTERFACE} {}

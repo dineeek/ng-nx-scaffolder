@@ -1,34 +1,44 @@
 package com.ngscaffolder.actions
 
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.vfs.VfsUtil
+import com.ngscaffolder.dialogs.PreviewEntry
 import com.ngscaffolder.dialogs.SimpleLibDialog
 import com.ngscaffolder.generators.UiLibGenerator
 import com.ngscaffolder.util.NamingUtils
 
 class NewUiLibAction : BaseScaffoldAction() {
 
+    @Suppress("CyclomaticComplexMethod", "ReturnCount")
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val directory = getTargetDirectory(e) ?: return
 
+        val workspaceRoot = findWorkspaceRoot(directory)
+        if (workspaceRoot == null) {
+            showNxNotFound(project)
+            return
+        }
+        if (!validateTargetDirectory(project, workspaceRoot, directory)) return
+        val scope = detectNpmScope(workspaceRoot)
+
         val dialog = SimpleLibDialog(
             "New UI Library",
-            "e.g. buttons → example standalone component",
-            showPrefix = true
+            "e.g. button → button-ui/button.component.ts",
+            showPrefix = true,
+            typeSuffix = "ui",
         )
         if (!dialog.showAndGet()) return
 
         val name = dialog.libName.trim()
         if (name.isEmpty()) return
 
-        val kebab = NamingUtils.toKebabCase(name)
+        val effectiveName = dialog.getEffectiveName()
+        val kebab = NamingUtils.toKebabCase(effectiveName)
+        val inputKebab = NamingUtils.toKebabCase(name)
+        if (libAlreadyExists(project, directory, kebab)) return
         val prefix = dialog.prefix.trim()
-        val workspaceRoot = findWorkspaceRoot(directory)
-        if (workspaceRoot == null) {
-            showNxNotFound(project)
-            return
-        }
-
+        val importPath = scope?.let { "$it/$kebab" } ?: kebab
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
         val generator = getConfiguredGenerator()
@@ -38,14 +48,27 @@ class NewUiLibAction : BaseScaffoldAction() {
             prefix = prefix,
             style = "scss",
             tools = tools,
+            publishable = dialog.publishable,
+            importPath = importPath,
         )
+
+        val snapshot = snapshotWorkspaceFiles(workspaceRoot)
 
         val preview = runNxDryRun(project, workspaceRoot, generator, nxArgs)
         if (preview == null || !preview.success) {
             showNxError(project, preview)
             return
         }
-        if (!showDryRunPreview(project, preview.output)) return
+        val parsed = parseDryRunOutput(preview.output)
+        val nxLibRoot = extractLibRoot(parsed) ?: relativePath
+        val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + listOf(
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.html"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.scss"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.spec.ts"),
+            PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
+        )
+        if (!showTreePreview(project, flatEntries)) return
 
         val result = runNxGenerate(project, workspaceRoot, generator, nxArgs)
         if (result == null || !result.success) {
@@ -53,10 +76,16 @@ class NewUiLibAction : BaseScaffoldAction() {
             return
         }
 
-        val libRoot = refreshAndFindLibDir(directory, kebab) ?: return
+        VfsUtil.markDirtyAndRefresh(false, true, true, directory, workspaceRoot)
+        com.intellij.openapi.application.WriteAction.runAndWait<Throwable> {
+            flattenNestedLib(workspaceRoot, nxLibRoot, relativePath)
+            restoreWorkspaceFiles(workspaceRoot, snapshot)
+        }
+        val libRoot = refreshAndFindLibByPath(workspaceRoot, relativePath) ?: return
 
         val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
+            fixTestSetup(libRoot)
             UiLibGenerator(project).generate(libRoot, name, prefix)
         }
         if (file != null) {

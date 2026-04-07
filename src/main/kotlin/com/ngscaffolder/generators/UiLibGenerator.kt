@@ -3,32 +3,41 @@ package com.ngscaffolder.generators
 import com.intellij.ide.fileTemplates.FileTemplateManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
+import com.ngscaffolder.util.NamingUtils
 import java.util.*
 
 class UiLibGenerator(private val project: Project) {
 
     @Suppress("UNUSED_PARAMETER")
     fun generate(libRoot: VirtualFile, name: String, prefix: String): VirtualFile {
+        val kebab = NamingUtils.toKebabCase(name)
+        val className = NamingUtils.toPascalCase(name)
+
         val props = Properties().apply {
             setProperty("PREFIX", prefix)
+            setProperty("FILE_NAME", kebab)
+            setProperty("CLASS_NAME", className)
         }
 
         val templateManager = FileTemplateManager.getInstance(project)
 
         val srcDir = libRoot.findChild("src")!!
         val libDir = srcDir.findChild("lib")!!
-        val exampleDir = libDir.createChildDirectory(this, "example")
+        val componentDir = libDir.createChildDirectory(this, kebab)
 
         val componentTpl = templateManager.getInternalTemplate("Ui Example Component")
-        createFile(exampleDir, "example.component.ts", componentTpl.getText(props))
+        createFile(componentDir, "$kebab.component.ts", componentTpl.getText(props))
 
         val htmlTpl = templateManager.getInternalTemplate("Ui Example Component HTML")
-        createFile(exampleDir, "example.component.html", htmlTpl.getText(props))
-        createFile(exampleDir, "example.component.scss", "")
+        createFile(componentDir, "$kebab.component.html", htmlTpl.getText(props))
+        createFile(componentDir, "$kebab.component.scss", "")
 
-        overwriteFile(srcDir, "index.ts", "export { ExampleComponent } from './lib/example/example.component'\n")
+        val specTpl = templateManager.getInternalTemplate("Ui Example Component Spec")
+        createFile(componentDir, "$kebab.component.spec.ts", specTpl.getText(props))
 
-        return exampleDir.findChild("example.component.ts")!!
+        overwriteFile(srcDir, "index.ts", "export { ${className}Component } from './lib/$kebab/$kebab.component'\n")
+
+        return componentDir.findChild("$kebab.component.ts")!!
     }
 
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {
