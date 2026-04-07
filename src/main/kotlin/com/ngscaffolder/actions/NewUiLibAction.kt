@@ -24,15 +24,18 @@ class NewUiLibAction : BaseScaffoldAction() {
 
         val dialog = SimpleLibDialog(
             "New UI Library",
-            "e.g. button → button.component.ts",
-            showPrefix = true
+            "e.g. button → button-ui/button.component.ts",
+            showPrefix = true,
+            typeSuffix = "ui",
         )
         if (!dialog.showAndGet()) return
 
         val name = dialog.libName.trim()
         if (name.isEmpty()) return
 
-        val kebab = NamingUtils.toKebabCase(name)
+        val effectiveName = dialog.getEffectiveName()
+        val kebab = NamingUtils.toKebabCase(effectiveName)
+        val inputKebab = NamingUtils.toKebabCase(name)
         if (libAlreadyExists(project, directory, kebab)) return
         val prefix = dialog.prefix.trim()
         val importPath = scope?.let { "$it/$kebab" } ?: kebab
@@ -59,10 +62,10 @@ class NewUiLibAction : BaseScaffoldAction() {
         val parsed = parseDryRunOutput(preview.output)
         val nxLibRoot = extractLibRoot(parsed) ?: relativePath
         val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + listOf(
-            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.ts"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.html"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.scss"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/$kebab/$kebab.component.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.html"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.scss"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.component.spec.ts"),
             PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
         )
         if (!showTreePreview(project, flatEntries)) return

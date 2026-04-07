@@ -21,14 +21,14 @@ class ModelLibGenerator(private val project: Project) {
 
         val srcDir = libRoot.findChild("src")!!
         val libDir = srcDir.findChild("lib")!!
-        val modelsDir = libDir.createChildDirectory(this, "models")
+        val modelDir = libDir.createChildDirectory(this, kebab)
 
         val tpl = templateManager.getInternalTemplate("Model Interface")
-        createFile(modelsDir, "$kebab.model.ts", tpl.getText(props))
+        createFile(modelDir, "$kebab.model.ts", tpl.getText(props))
 
-        overwriteFile(srcDir, "index.ts", "export { I$className } from './lib/models/$kebab.model'\n")
+        overwriteFile(srcDir, "index.ts", "export { I$className } from './lib/$kebab/$kebab.model'\n")
 
-        return modelsDir.findChild("$kebab.model.ts")!!
+        return modelDir.findChild("$kebab.model.ts")!!
     }
 
     private fun createFile(dir: VirtualFile, fileName: String, content: String) {

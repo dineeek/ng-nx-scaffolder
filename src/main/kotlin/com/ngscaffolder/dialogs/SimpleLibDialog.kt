@@ -13,6 +13,7 @@ class SimpleLibDialog(
     dialogTitle: String,
     private val nameComment: String,
     private val showPrefix: Boolean = false,
+    private val typeSuffix: String? = null,
 ) : DialogWrapper(true) {
 
     private val settings = PluginSettings.getInstance().state
@@ -20,12 +21,18 @@ class SimpleLibDialog(
     var libName: String = ""
     var prefix: String = settings.selectorPrefix
     var publishable: Boolean = false
+    var addTypeSuffix: Boolean = true
 
     private lateinit var nameField: JTextField
 
     init {
         title = dialogTitle
         init()
+    }
+
+    fun getEffectiveName(): String {
+        val name = libName.trim()
+        return if (addTypeSuffix && typeSuffix != null) "$name-$typeSuffix" else name
     }
 
     override fun createCenterPanel(): JComponent = panel {
@@ -40,6 +47,13 @@ class SimpleLibDialog(
             row("Selector prefix:") {
                 textField()
                     .bindText(::prefix)
+            }
+        }
+        if (typeSuffix != null) {
+            row {
+                checkBox("Add type suffix (-$typeSuffix)")
+                    .bindSelected(::addTypeSuffix)
+                    .comment("Library folder will be named e.g. order-$typeSuffix")
             }
         }
         separator()
