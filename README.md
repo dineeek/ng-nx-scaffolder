@@ -104,7 +104,7 @@ Generates a standalone Angular component (OnPush, signals) with barrel export.
 
 | Create | Preview | Generated |
 |-|-|-|
-| ![Create](assets/screenshots/ui/create.png) | ![Preview](assets/screenshots/ui/generate.png) | ![Generated](assets/screenshots/ui/generated.png) |
+| ![Create](assets/screenshots/ui/create.png) | ![Preview](assets/screenshots/ui/preview.png) | ![Generated](assets/screenshots/ui/generated.png) |
 
 </details>
 
