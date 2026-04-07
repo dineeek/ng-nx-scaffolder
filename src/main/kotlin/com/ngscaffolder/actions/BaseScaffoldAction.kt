@@ -188,7 +188,7 @@ abstract class BaseScaffoldAction : AnAction() {
     }
 
     protected fun snapshotWorkspaceFiles(workspaceRoot: VirtualFile): Map<String, ByteArray> {
-        val filesToPreserve = listOf(".prettierignore", "nx.json")
+        val filesToPreserve = listOf(".prettierignore", "nx.json", "package.json", "project.json")
         val snapshot = mutableMapOf<String, ByteArray>()
         for (name in filesToPreserve) {
             val diskFile = java.io.File(workspaceRoot.path, name)
@@ -201,6 +201,18 @@ abstract class BaseScaffoldAction : AnAction() {
         for ((name, content) in snapshot) {
             java.io.File(workspaceRoot.path, name).writeBytes(content)
             workspaceRoot.findChild(name)?.refresh(false, false)
+        }
+        cleanupNxSideEffects(workspaceRoot, snapshot)
+    }
+
+    private fun cleanupNxSideEffects(workspaceRoot: VirtualFile, snapshot: Map<String, ByteArray>) {
+        // Remove .verdaccio directory created by publishable libs
+        val verdaccio = workspaceRoot.findChild(".verdaccio")
+        if (verdaccio != null) verdaccio.delete(this)
+        // Remove root project.json if it was created by Nx (not present before generation)
+        if ("project.json" !in snapshot) {
+            val rootProject = workspaceRoot.findChild("project.json")
+            if (rootProject != null) rootProject.delete(this)
         }
     }
 
@@ -259,11 +271,13 @@ abstract class BaseScaffoldAction : AnAction() {
         val cleanedPattern = Regex(".*/src/lib/[^/]+(/.*)?\\.((component\\.(ts|html|css|scss|spec\\.ts))|ts)$")
         // Workspace root files we restore or that are Nx side effects
         val ignoredUpdates = setOf(".prettierignore", "nx.json", "package.json")
+        val ignoredRootCreates = setOf("project.json")
         return entries.filter { entry ->
             val fileName = entry.path.substringAfterLast("/")
             !entry.path.startsWith(".verdaccio")
                 && !(entry.operation == "CREATE" && cleanedPattern.matches(entry.path))
                 && !(entry.operation == "UPDATE" && fileName in ignoredUpdates)
+                && !(entry.operation == "CREATE" && !entry.path.contains("/") && fileName in ignoredRootCreates)
         }
     }
 
