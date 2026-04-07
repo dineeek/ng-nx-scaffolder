@@ -361,11 +361,11 @@ abstract class BaseScaffoldAction : AnAction() {
             var content = String(file.contentsToByteArray())
             content = content.replace(oldRelative, newRelative)
             content = content.replace(nxLibRoot, targetPath)
-            // Fix doubled project name (e.g. "random-random" → "random")
+            // Fix doubled project name (e.g. "random-random" → "random", "random/random" → "random")
             val nxName = nxLibRoot.substringAfterLast("/")
             val targetName = targetPath.substringAfterLast("/")
-            val doubledName = "$targetName-$nxName"
-            content = content.replace(doubledName, targetName)
+            content = content.replace("$targetName-$nxName", targetName)
+            content = content.replace("$targetName/$nxName", targetName)
             file.setBinaryContent(content.toByteArray())
         }
     }
