@@ -9,6 +9,7 @@ import com.ngscaffolder.util.NamingUtils
 
 class NewUiLibAction : BaseScaffoldAction() {
 
+    @Suppress("CyclomaticComplexMethod", "ReturnCount")
     override fun actionPerformed(e: AnActionEvent) {
         val project = e.project ?: return
         val directory = getTargetDirectory(e) ?: return

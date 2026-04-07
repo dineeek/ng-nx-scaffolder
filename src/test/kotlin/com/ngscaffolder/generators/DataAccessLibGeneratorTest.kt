@@ -23,10 +23,11 @@ class DataAccessLibGeneratorTest : BasePlatformTestCase() {
             DataAccessLibGenerator(project).generate(libRoot, "users")
         }
 
-        val services = libRoot.findChild("src")!!.findChild("lib")!!.findChild("services")
-        assertNotNull(services)
-        assertNotNull(services!!.findChild("users.service.ts"))
-        assertNotNull(services.findChild("users.service.spec.ts"))
+        val svcDir = libRoot.findChild("src")!!
+            .findChild("lib")!!.findChild("users")
+        assertNotNull(svcDir)
+        assertNotNull(svcDir!!.findChild("users.service.ts"))
+        assertNotNull(svcDir.findChild("users.service.spec.ts"))
     }
 
     fun `test overwrites index with service export`() {
@@ -36,8 +37,11 @@ class DataAccessLibGeneratorTest : BasePlatformTestCase() {
             DataAccessLibGenerator(project).generate(libRoot, "users")
         }
 
-        val indexContent = String(libRoot.findChild("src")!!.findChild("index.ts")!!.contentsToByteArray())
-        assertTrue(indexContent.contains("UsersService"))
-        assertTrue(indexContent.contains("users.service"))
+        val content = String(
+            libRoot.findChild("src")!!
+                .findChild("index.ts")!!.contentsToByteArray()
+        )
+        assertTrue(content.contains("UsersService"))
+        assertTrue(content.contains("users/users.service"))
     }
 }
