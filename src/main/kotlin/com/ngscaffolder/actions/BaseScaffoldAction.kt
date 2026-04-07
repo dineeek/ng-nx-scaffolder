@@ -257,12 +257,13 @@ abstract class BaseScaffoldAction : AnAction() {
     protected fun filterCleanedFiles(entries: List<PreviewEntry>): List<PreviewEntry> {
         // Matches Angular component defaults and JS lib defaults in src/lib/
         val cleanedPattern = Regex(".*/src/lib/[^/]+(/.*)?\\.((component\\.(ts|html|css|scss|spec\\.ts))|ts)$")
-        // Workspace root files we restore after generation
-        val restoredFiles = setOf(".prettierignore", "nx.json")
+        // Workspace root files we restore or that are Nx side effects
+        val ignoredUpdates = setOf(".prettierignore", "nx.json", "package.json")
         return entries.filter { entry ->
             val fileName = entry.path.substringAfterLast("/")
-            !(entry.operation == "CREATE" && cleanedPattern.matches(entry.path))
-                && !(entry.operation == "UPDATE" && fileName in restoredFiles)
+            !entry.path.startsWith(".verdaccio")
+                && !(entry.operation == "CREATE" && cleanedPattern.matches(entry.path))
+                && !(entry.operation == "UPDATE" && fileName in ignoredUpdates)
         }
     }
 
