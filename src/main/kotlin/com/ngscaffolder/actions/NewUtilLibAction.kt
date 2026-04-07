@@ -39,8 +39,8 @@ class NewUtilLibAction : BaseScaffoldAction() {
         val importPath = scope?.let { "$it/$kebab" } ?: kebab
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
-        val generator = "@nx/js:library"
-        val nxArgs = buildJsLibNxArgs(
+        val generator = getConfiguredGenerator()
+        val nxArgs = buildNxArgs(
             name = kebab, relativePath = relativePath, tools = tools,
             publishable = dialog.publishable, importPath = importPath,
         )
@@ -76,6 +76,7 @@ class NewUtilLibAction : BaseScaffoldAction() {
 
         val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
+            fixTestSetup(libRoot)
             UtilLibGenerator(project).generate(libRoot, name)
         }
         if (file != null) {
