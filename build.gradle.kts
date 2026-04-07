@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.ngscaffolder"
-version = "0.1.0"
+version = "1.0.0-beta.1"
 
 repositories {
     mavenCentral()
