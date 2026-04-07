@@ -29,7 +29,8 @@ class DryRunPreviewDialog(
 
     override fun createCenterPanel(): JComponent {
         val root = DefaultMutableTreeNode("Files")
-        for (entry in entries) {
+        val sorted = entries.sortedBy { if (it.path.contains("/src/")) 0 else 1 }
+        for (entry in sorted) {
             insertPath(root, entry)
         }
         val tree = Tree(DefaultTreeModel(root))
