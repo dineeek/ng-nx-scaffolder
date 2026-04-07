@@ -103,12 +103,35 @@ abstract class BaseScaffoldAction : AnAction() {
         return VfsUtil.getRelativePath(directory, workspaceRoot) ?: directory.name
     }
 
+    protected fun validateTargetDirectory(project: Project, workspaceRoot: VirtualFile, directory: VirtualFile): Boolean {
+        val relativePath = VfsUtil.getRelativePath(directory, workspaceRoot) ?: ""
+        if (!relativePath.startsWith("libs")) {
+            Messages.showErrorDialog(project, "Libraries must be created inside the 'libs' folder.", "Invalid Location")
+            return false
+        }
+        if (directory.findChild("src") != null || directory.findChild("project.json") != null) {
+            Messages.showErrorDialog(project, "This folder already contains a library.", "Invalid Location")
+            return false
+        }
+        return true
+    }
+
+    protected fun libAlreadyExists(project: Project, directory: VirtualFile, kebab: String): Boolean {
+        if (directory.findChild(kebab) != null) {
+            Messages.showErrorDialog(project, "Library '$kebab' already exists in this directory.", "Duplicate Library")
+            return true
+        }
+        return false
+    }
+
     protected fun buildNxArgs(
         name: String,
         relativePath: String,
         prefix: String? = null,
         style: String = "none",
         tools: WorkspaceTools,
+        publishable: Boolean = false,
+        importPath: String? = null,
     ): List<String> {
         val args = mutableListOf(
             name,
@@ -119,6 +142,10 @@ abstract class BaseScaffoldAction : AnAction() {
         if (style != "none") args.add("--style=$style")
         if (!tools.hasEslint) args.add("--linter=none")
         args.add("--unitTestRunner=${tools.testRunner.cliValue}")
+        if (publishable) {
+            args.add("--publishable")
+            args.add("--importPath=${importPath ?: name}")
+        }
         return args
     }
 
@@ -127,6 +154,8 @@ abstract class BaseScaffoldAction : AnAction() {
         relativePath: String,
         tools: WorkspaceTools,
         skipTests: Boolean = false,
+        publishable: Boolean = false,
+        importPath: String? = null,
     ): List<String> {
         val args = mutableListOf(
             name,
@@ -134,7 +163,23 @@ abstract class BaseScaffoldAction : AnAction() {
         )
         if (!tools.hasEslint) args.add("--linter=none")
         args.add("--unitTestRunner=${if (skipTests) "none" else tools.testRunner.cliValue}")
+        if (publishable) {
+            args.add("--publishable")
+            args.add("--importPath=${importPath ?: name}")
+        }
         return args
+    }
+
+    protected fun fixTestSetup(libRoot: VirtualFile) {
+        val testSetup = libRoot.findChild("src")?.findChild("test-setup.ts") ?: return
+        testSetup.setBinaryContent("import 'jest-preset-angular/setup-jest'\n".toByteArray())
+    }
+
+    protected fun detectNpmScope(workspaceRoot: VirtualFile): String? {
+        val packageJson = java.io.File(workspaceRoot.path, "package.json")
+        if (!packageJson.exists()) return null
+        val match = Regex("\"name\"\\s*:\\s*\"(@[^/]+)/").find(packageJson.readText())
+        return match?.groupValues?.get(1)
     }
 
     protected fun getConfiguredGenerator(): String {
@@ -145,18 +190,16 @@ abstract class BaseScaffoldAction : AnAction() {
         val filesToPreserve = listOf(".prettierignore", "nx.json")
         val snapshot = mutableMapOf<String, ByteArray>()
         for (name in filesToPreserve) {
-            val file = workspaceRoot.findChild(name) ?: continue
-            snapshot[name] = file.contentsToByteArray()
+            val diskFile = java.io.File(workspaceRoot.path, name)
+            if (diskFile.exists()) snapshot[name] = diskFile.readBytes()
         }
         return snapshot
     }
 
     protected fun restoreWorkspaceFiles(workspaceRoot: VirtualFile, snapshot: Map<String, ByteArray>) {
         for ((name, content) in snapshot) {
-            val file = workspaceRoot.findChild(name) ?: continue
-            if (!file.contentsToByteArray().contentEquals(content)) {
-                file.setBinaryContent(content)
-            }
+            java.io.File(workspaceRoot.path, name).writeBytes(content)
+            workspaceRoot.findChild(name)?.refresh(false, false)
         }
     }
 
@@ -307,8 +350,8 @@ abstract class BaseScaffoldAction : AnAction() {
         val newRelative = "../".repeat(targetDepth)    // e.g. ../../
 
         val configFiles = listOf(
-            "tsconfig.json", "tsconfig.lib.json", "tsconfig.spec.json",
-            "jest.config.ts", "project.json",
+            "tsconfig.json", "tsconfig.lib.json", "tsconfig.lib.prod.json",
+            "tsconfig.spec.json", "jest.config.ts", "project.json",
         )
         for (fileName in configFiles) {
             val file = libDir.findChild(fileName) ?: continue
@@ -326,17 +369,17 @@ abstract class BaseScaffoldAction : AnAction() {
 
     private fun fixWorkspaceRootPaths(workspaceRoot: VirtualFile, nxLibRoot: String, targetPath: String) {
         // Fix tsconfig.base.json path alias (e.g. "button/button" → "button", path libs/button/button/... → libs/button/...)
-        val tsconfigBase = workspaceRoot.findChild("tsconfig.base.json")
-        if (tsconfigBase != null) {
-            var content = String(tsconfigBase.contentsToByteArray())
-            content = content.replace(nxLibRoot, targetPath)
-            // Fix doubled alias key (e.g. "@scope/button/button" → "@scope/button")
-            val nxName = nxLibRoot.substringAfterLast("/")
-            val targetName = targetPath.substringAfterLast("/")
-            val doubledName = "$targetName/$nxName"
-            content = content.replace(doubledName, targetName)
-            tsconfigBase.setBinaryContent(content.toByteArray())
-        }
+        val tsconfigFile = java.io.File(workspaceRoot.path, "tsconfig.base.json")
+        if (!tsconfigFile.exists()) return
+        var content = tsconfigFile.readText()
+        content = content.replace(nxLibRoot, targetPath)
+        // Fix doubled alias key (e.g. "@scope/button/button" → "@scope/button")
+        val nxName = nxLibRoot.substringAfterLast("/")
+        val targetName = targetPath.substringAfterLast("/")
+        val doubledName = "$targetName/$nxName"
+        content = content.replace(doubledName, targetName)
+        tsconfigFile.writeText(content)
+        workspaceRoot.findChild("tsconfig.base.json")?.refresh(false, false)
     }
 
     private fun findByPath(root: VirtualFile, relativePath: String): VirtualFile? {

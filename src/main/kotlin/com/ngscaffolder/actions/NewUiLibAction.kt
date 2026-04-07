@@ -13,9 +13,17 @@ class NewUiLibAction : BaseScaffoldAction() {
         val project = e.project ?: return
         val directory = getTargetDirectory(e) ?: return
 
+        val workspaceRoot = findWorkspaceRoot(directory)
+        if (workspaceRoot == null) {
+            showNxNotFound(project)
+            return
+        }
+        if (!validateTargetDirectory(project, workspaceRoot, directory)) return
+        val scope = detectNpmScope(workspaceRoot)
+
         val dialog = SimpleLibDialog(
             "New UI Library",
-            "e.g. buttons → example standalone component",
+            "e.g. button → button.component.ts",
             showPrefix = true
         )
         if (!dialog.showAndGet()) return
@@ -24,13 +32,9 @@ class NewUiLibAction : BaseScaffoldAction() {
         if (name.isEmpty()) return
 
         val kebab = NamingUtils.toKebabCase(name)
+        if (libAlreadyExists(project, directory, kebab)) return
         val prefix = dialog.prefix.trim()
-        val workspaceRoot = findWorkspaceRoot(directory)
-        if (workspaceRoot == null) {
-            showNxNotFound(project)
-            return
-        }
-
+        val importPath = scope?.let { "$it/$kebab" } ?: kebab
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
         val generator = getConfiguredGenerator()
@@ -40,6 +44,8 @@ class NewUiLibAction : BaseScaffoldAction() {
             prefix = prefix,
             style = "scss",
             tools = tools,
+            publishable = dialog.publishable,
+            importPath = importPath,
         )
 
         val snapshot = snapshotWorkspaceFiles(workspaceRoot)
@@ -75,6 +81,7 @@ class NewUiLibAction : BaseScaffoldAction() {
 
         val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
+            fixTestSetup(libRoot)
             UiLibGenerator(project).generate(libRoot, name, prefix)
         }
         if (file != null) {

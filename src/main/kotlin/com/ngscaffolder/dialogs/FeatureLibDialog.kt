@@ -18,6 +18,7 @@ class FeatureLibDialog : DialogWrapper(true) {
     var hasForm: Boolean = false
     var hasRouting: Boolean = false
     var isDialog: Boolean = false
+    var publishable: Boolean = false
 
     private lateinit var nameField: JTextField
 
@@ -55,6 +56,12 @@ class FeatureLibDialog : DialogWrapper(true) {
         row("Selector prefix:") {
             textField()
                 .bindText(::prefix)
+        }
+        separator()
+        row {
+            checkBox("Publishable")
+                .bindSelected(::publishable)
+                .comment("Generates ng-package.json, package.json, tsconfig.lib.prod.json")
         }
         separator()
         row {

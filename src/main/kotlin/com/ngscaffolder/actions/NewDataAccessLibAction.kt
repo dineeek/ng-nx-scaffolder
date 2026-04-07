@@ -13,9 +13,17 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
         val project = e.project ?: return
         val directory = getTargetDirectory(e) ?: return
 
+        val workspaceRoot = findWorkspaceRoot(directory)
+        if (workspaceRoot == null) {
+            showNxNotFound(project)
+            return
+        }
+        if (!validateTargetDirectory(project, workspaceRoot, directory)) return
+        val scope = detectNpmScope(workspaceRoot)
+
         val dialog = SimpleLibDialog(
             "New Data-Access Library",
-            "e.g. users → users/users.service.ts"
+            "e.g. user → user.service.ts"
         )
         if (!dialog.showAndGet()) return
 
@@ -23,16 +31,15 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
         if (name.isEmpty()) return
 
         val kebab = NamingUtils.toKebabCase(name)
-        val workspaceRoot = findWorkspaceRoot(directory)
-        if (workspaceRoot == null) {
-            showNxNotFound(project)
-            return
-        }
-
+        if (libAlreadyExists(project, directory, kebab)) return
+        val importPath = scope?.let { "$it/$kebab" } ?: kebab
         val tools = detectWorkspaceTools(workspaceRoot)
         val relativePath = getRelativePath(workspaceRoot, directory) + "/$kebab"
         val generator = getConfiguredGenerator()
-        val nxArgs = buildNxArgs(name = kebab, relativePath = relativePath, tools = tools)
+        val nxArgs = buildNxArgs(
+            name = kebab, relativePath = relativePath, tools = tools,
+            publishable = dialog.publishable, importPath = importPath,
+        )
 
         val snapshot = snapshotWorkspaceFiles(workspaceRoot)
 
@@ -65,6 +72,7 @@ class NewDataAccessLibAction : BaseScaffoldAction() {
 
         val file = runWithCleanup(project, libRoot) {
             cleanNxDefaultFiles(libRoot)
+            fixTestSetup(libRoot)
             DataAccessLibGenerator(project).generate(libRoot, name)
         }
         if (file != null) {

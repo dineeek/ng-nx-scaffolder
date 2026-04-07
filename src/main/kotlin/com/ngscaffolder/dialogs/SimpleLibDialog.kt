@@ -2,6 +2,7 @@ package com.ngscaffolder.dialogs
 
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.ui.dsl.builder.bindSelected
 import com.intellij.ui.dsl.builder.bindText
 import com.intellij.ui.dsl.builder.panel
 import com.ngscaffolder.settings.PluginSettings
@@ -18,6 +19,7 @@ class SimpleLibDialog(
 
     var libName: String = ""
     var prefix: String = settings.selectorPrefix
+    var publishable: Boolean = false
 
     private lateinit var nameField: JTextField
 
@@ -39,6 +41,12 @@ class SimpleLibDialog(
                 textField()
                     .bindText(::prefix)
             }
+        }
+        separator()
+        row {
+            checkBox("Publishable")
+                .bindSelected(::publishable)
+                .comment("Generates ng-package.json, package.json, tsconfig.lib.prod.json")
         }
     }
 
