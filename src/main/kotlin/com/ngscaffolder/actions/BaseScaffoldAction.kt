@@ -23,6 +23,7 @@ import com.ngscaffolder.generators.TestRunner
 import com.ngscaffolder.generators.WorkspaceTools
 import com.ngscaffolder.settings.PluginSettings
 
+@Suppress("TooManyFunctions")
 abstract class BaseScaffoldAction : AnAction() {
 
     private val log = Logger.getInstance(BaseScaffoldAction::class.java)

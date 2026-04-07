@@ -22,8 +22,7 @@ class FeatureLibGeneratorTest : BasePlatformTestCase() {
         hasFacade: Boolean = false,
         hasForm: Boolean = false,
         hasRouting: Boolean = false,
-        isDialog: Boolean = false,
-    ) = FeatureLibOptions(name, "app", hasStore, hasFacade, hasForm, hasRouting, isDialog)
+    ) = FeatureLibOptions(name, "app", hasStore, hasFacade, hasForm, hasRouting)
 
     fun `test generates container files`() {
         val libRoot = createLibRoot()
@@ -116,30 +115,6 @@ class FeatureLibGeneratorTest : BasePlatformTestCase() {
 
         val lib = libRoot.findChild("src")!!.findChild("lib")!!
         assertNotNull(lib.findChild("orders.routes.ts"))
-    }
-
-    fun `test no routes when dialog`() {
-        val libRoot = createLibRoot()
-
-        WriteAction.runAndWait<Throwable> {
-            FeatureLibGenerator(project).generate(
-                libRoot, opts(hasRouting = true, isDialog = true)
-            )
-        }
-
-        val lib = libRoot.findChild("src")!!.findChild("lib")!!
-        assertNull(lib.findChild("orders.routes.ts"))
-    }
-
-    fun `test dialog generates dialog model`() {
-        val libRoot = createLibRoot()
-
-        WriteAction.runAndWait<Throwable> {
-            FeatureLibGenerator(project).generate(libRoot, opts(isDialog = true))
-        }
-
-        val models = libRoot.findChild("src")!!.findChild("lib")!!.findChild("models")!!
-        assertNotNull(models.findChild("orders-dialog.model.ts"))
     }
 
     fun `test overwrites index ts`() {

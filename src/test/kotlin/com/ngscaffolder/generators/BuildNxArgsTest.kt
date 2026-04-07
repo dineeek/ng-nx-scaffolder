@@ -15,6 +15,7 @@ class BuildNxArgsTest {
             hasStylelint = false,
             hasPrettier = false,
             testRunner = TestRunner.JEST,
+            nxMajorVersion = 18,
         ),
     ): List<String> {
         val args = mutableListOf(
@@ -63,36 +64,47 @@ class BuildNxArgsTest {
 
     @Test
     fun `adds linter none when eslint absent`() {
-        val tools = WorkspaceTools(hasEslint = false, hasStylelint = false, hasPrettier = false, testRunner = TestRunner.JEST)
+        val tools = tools(hasEslint = false)
         val args = buildArgs(tools = tools)
         assertTrue(args.contains("--linter=none"))
     }
 
     @Test
     fun `omits linter none when eslint present`() {
-        val tools = WorkspaceTools(hasEslint = true, hasStylelint = false, hasPrettier = false, testRunner = TestRunner.JEST)
+        val tools = tools(hasEslint = true)
         val args = buildArgs(tools = tools)
         assertFalse(args.contains("--linter=none"))
     }
 
     @Test
     fun `sets jest test runner`() {
-        val tools = WorkspaceTools(hasEslint = true, hasStylelint = false, hasPrettier = false, testRunner = TestRunner.JEST)
+        val tools = tools(testRunner = TestRunner.JEST)
         val args = buildArgs(tools = tools)
         assertTrue(args.contains("--unitTestRunner=jest"))
     }
 
     @Test
     fun `sets vitest test runner`() {
-        val tools = WorkspaceTools(hasEslint = true, hasStylelint = false, hasPrettier = false, testRunner = TestRunner.VITEST)
+        val tools = tools(testRunner = TestRunner.VITEST)
         val args = buildArgs(tools = tools)
         assertTrue(args.contains("--unitTestRunner=vitest"))
     }
 
     @Test
     fun `sets none test runner`() {
-        val tools = WorkspaceTools(hasEslint = true, hasStylelint = false, hasPrettier = false, testRunner = TestRunner.NONE)
+        val tools = tools(testRunner = TestRunner.NONE)
         val args = buildArgs(tools = tools)
         assertTrue(args.contains("--unitTestRunner=none"))
     }
+
+    private fun tools(
+        hasEslint: Boolean = true,
+        testRunner: TestRunner = TestRunner.JEST,
+    ) = WorkspaceTools(
+        hasEslint = hasEslint,
+        hasStylelint = false,
+        hasPrettier = false,
+        testRunner = testRunner,
+        nxMajorVersion = 18,
+    )
 }

@@ -16,18 +16,20 @@ class UiLibGeneratorTest : BasePlatformTestCase() {
         }
     }
 
-    fun `test generates example component files`() {
+    fun `test generates component files in subdirectory`() {
         val libRoot = createLibRoot()
 
         WriteAction.runAndWait<Throwable> {
             UiLibGenerator(project).generate(libRoot, "buttons", "app")
         }
 
-        val example = libRoot.findChild("src")!!.findChild("lib")!!.findChild("example")
-        assertNotNull(example)
-        assertNotNull(example!!.findChild("example.component.ts"))
-        assertNotNull(example.findChild("example.component.html"))
-        assertNotNull(example.findChild("example.component.scss"))
+        val compDir = libRoot.findChild("src")!!
+            .findChild("lib")!!.findChild("buttons")
+        assertNotNull(compDir)
+        assertNotNull(compDir!!.findChild("buttons.component.ts"))
+        assertNotNull(compDir.findChild("buttons.component.html"))
+        assertNotNull(compDir.findChild("buttons.component.scss"))
+        assertNotNull(compDir.findChild("buttons.component.spec.ts"))
     }
 
     fun `test overwrites index with component export`() {
@@ -37,7 +39,11 @@ class UiLibGeneratorTest : BasePlatformTestCase() {
             UiLibGenerator(project).generate(libRoot, "buttons", "app")
         }
 
-        val indexContent = String(libRoot.findChild("src")!!.findChild("index.ts")!!.contentsToByteArray())
-        assertTrue(indexContent.contains("ExampleComponent"))
+        val content = String(
+            libRoot.findChild("src")!!
+                .findChild("index.ts")!!.contentsToByteArray()
+        )
+        assertTrue(content.contains("ButtonsComponent"))
+        assertTrue(content.contains("buttons/buttons.component"))
     }
 }

@@ -148,10 +148,9 @@ class NxCliRunner {
                     .start()
                 val path = proc.inputStream.bufferedReader().readText().trim()
                 proc.waitFor(5, java.util.concurrent.TimeUnit.SECONDS)
-                if (proc.exitValue() == 0 && path.isNotEmpty()
+                val isValid = proc.exitValue() == 0 && path.isNotEmpty()
                     && !path.contains("not found")
-                    && java.io.File(path).canExecute()
-                ) {
+                if (isValid && java.io.File(path).canExecute()) {
                     log.info("NgNxScaffolder: resolved node via $shell -> $path")
                     return path
                 }
