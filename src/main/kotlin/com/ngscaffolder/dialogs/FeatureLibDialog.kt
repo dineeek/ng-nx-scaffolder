@@ -17,7 +17,6 @@ class FeatureLibDialog : DialogWrapper(true) {
     var hasFacade: Boolean = false
     var hasForm: Boolean = false
     var hasRouting: Boolean = false
-    var isDialog: Boolean = false
     var publishable: Boolean = false
 
     private lateinit var nameField: JTextField
@@ -79,11 +78,6 @@ class FeatureLibDialog : DialogWrapper(true) {
         row {
             checkBox("Routing")
                 .bindSelected(::hasRouting)
-        }
-        row {
-            checkBox("Dialog component")
-                .bindSelected(::isDialog)
-                .comment("Wraps container in a dialog with MAT_DIALOG_DATA")
         }
     }
 }

@@ -352,6 +352,7 @@ abstract class BaseScaffoldAction : AnAction() {
         val configFiles = listOf(
             "tsconfig.json", "tsconfig.lib.json", "tsconfig.lib.prod.json",
             "tsconfig.spec.json", "jest.config.ts", "project.json",
+            "ng-package.json", "package.json",
         )
         for (fileName in configFiles) {
             val file = libDir.findChild(fileName) ?: continue

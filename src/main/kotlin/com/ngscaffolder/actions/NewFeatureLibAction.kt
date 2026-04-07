@@ -80,11 +80,8 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.model.ts"))
             customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.service.spec.ts"))
         }
-        if (dialog.hasRouting && !dialog.isDialog) {
+        if (dialog.hasRouting) {
             customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/$kebab.routes.ts"))
-        }
-        if (dialog.isDialog) {
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/models/$kebab-dialog.model.ts"))
         }
 
         val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + customEntries
@@ -109,8 +106,7 @@ class NewFeatureLibAction : BaseScaffoldAction() {
             hasStore = dialog.hasStore,
             hasFacade = dialog.hasFacade,
             hasForm = dialog.hasForm,
-            hasRouting = dialog.hasRouting && !dialog.isDialog,
-            isDialog = dialog.isDialog,
+            hasRouting = dialog.hasRouting,
         )
 
         val file = runWithCleanup(project, libRoot) {
