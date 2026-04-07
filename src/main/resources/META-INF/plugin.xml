@@ -63,17 +63,16 @@
     </extensions>
 
     <actions>
-        <group id="NgNxScaffolder.NewGroup" text="Angular/Nx" popup="true">
+        <group id="NgNxScaffolder.NewGroup" text="ng-nx-scaffolder" popup="true">
             <add-to-group group-id="NewGroup" anchor="last"/>
 
-            <separator text="Nx Library Generators"/>
             <action id="NgNxScaffolder.NewFeatureLib"
                     class="com.ngscaffolder.actions.NewFeatureLibAction"
                     text="Feature Library"
                     description="Generate a feature lib with container, store, facade, form, mapper"/>
             <action id="NgNxScaffolder.NewDataAccessLib"
                     class="com.ngscaffolder.actions.NewDataAccessLibAction"
-                    text="Data-Access Library"
+                    text="Data Access Library"
                     description="Generate a data-access lib with HttpClient service"/>
             <action id="NgNxScaffolder.NewModelLib"
                     class="com.ngscaffolder.actions.NewModelLibAction"
