@@ -13,6 +13,7 @@ class FeatureLibDialog : DialogWrapper(true) {
 
     var libName: String = ""
     var prefix: String = settings.selectorPrefix
+    var addTypeSuffix: Boolean = true
     var hasStore: Boolean = true
     var hasFacade: Boolean = false
     var hasForm: Boolean = false
@@ -24,6 +25,11 @@ class FeatureLibDialog : DialogWrapper(true) {
     init {
         title = "New Feature Library"
         init()
+    }
+
+    fun getEffectiveName(): String {
+        val name = libName.trim()
+        return if (addTypeSuffix) "$name-feature" else name
     }
 
     override fun createCenterPanel(): JComponent = panel {
@@ -55,6 +61,11 @@ class FeatureLibDialog : DialogWrapper(true) {
         row("Selector prefix:") {
             textField()
                 .bindText(::prefix)
+        }
+        row {
+            checkBox("Add type suffix (-feature)")
+                .bindSelected(::addTypeSuffix)
+                .comment("Library folder will be named e.g. user-profile-feature")
         }
         separator()
         row {

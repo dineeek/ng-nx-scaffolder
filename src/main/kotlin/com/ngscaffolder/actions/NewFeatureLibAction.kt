@@ -29,7 +29,9 @@ class NewFeatureLibAction : BaseScaffoldAction() {
         val name = dialog.libName.trim()
         if (name.isEmpty()) return
 
-        val kebab = NamingUtils.toKebabCase(name)
+        val effectiveName = dialog.getEffectiveName()
+        val kebab = NamingUtils.toKebabCase(effectiveName)
+        val inputKebab = NamingUtils.toKebabCase(name)
         if (libAlreadyExists(project, directory, kebab)) return
         val prefix = dialog.prefix.trim()
         val importPath = scope?.let { "$it/$kebab" } ?: kebab
@@ -56,33 +58,33 @@ class NewFeatureLibAction : BaseScaffoldAction() {
         val parsed = parseDryRunOutput(preview.output)
         val nxLibRoot = extractLibRoot(parsed) ?: relativePath
 
-        val componentName = "$kebab-container"
+        val containerName = "$inputKebab-container"
         val customEntries = mutableListOf(
-            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.ts"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.html"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.scss"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/container/$componentName.component.spec.ts"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$kebab.mapper.ts"),
-            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$kebab.mapper.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.html"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.scss"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/container/$containerName.component.spec.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$inputKebab.mapper.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/mapper/$inputKebab.mapper.spec.ts"),
             PreviewEntry("CREATE", "$relativePath/src/lib/models/example.model.ts"),
             PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
         )
         if (dialog.hasStore) {
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$kebab.store.ts"))
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$kebab.state.ts"))
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$kebab.store.spec.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$inputKebab.store.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$inputKebab.state.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/store/$inputKebab.store.spec.ts"))
         }
         if (dialog.hasFacade) {
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$kebab-facade.service.ts"))
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$kebab-facade.service.spec.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$inputKebab-facade.service.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/facade/$inputKebab-facade.service.spec.ts"))
         }
         if (dialog.hasForm) {
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.service.ts"))
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.model.ts"))
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$kebab-form.service.spec.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$inputKebab-form.service.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$inputKebab-form.model.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/form/$inputKebab-form.service.spec.ts"))
         }
         if (dialog.hasRouting) {
-            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/$kebab.routes.ts"))
+            customEntries.add(PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab.routes.ts"))
         }
 
         val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + customEntries

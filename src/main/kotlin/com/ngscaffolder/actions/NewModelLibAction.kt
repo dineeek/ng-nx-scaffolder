@@ -24,14 +24,17 @@ class NewModelLibAction : BaseScaffoldAction() {
 
         val dialog = SimpleLibDialog(
             "New Model Library",
-            "e.g. user → user.model.ts"
+            "e.g. order → order-model/order.model.ts",
+            typeSuffix = "model",
         )
         if (!dialog.showAndGet()) return
 
         val name = dialog.libName.trim()
         if (name.isEmpty()) return
 
-        val kebab = NamingUtils.toKebabCase(name)
+        val effectiveName = dialog.getEffectiveName()
+        val kebab = NamingUtils.toKebabCase(effectiveName)
+        val inputKebab = NamingUtils.toKebabCase(name)
         if (libAlreadyExists(project, directory, kebab)) return
         val importPath = scope?.let { "$it/$kebab" } ?: kebab
         val tools = detectWorkspaceTools(workspaceRoot)
@@ -52,7 +55,7 @@ class NewModelLibAction : BaseScaffoldAction() {
         val parsed = parseDryRunOutput(preview.output)
         val nxLibRoot = extractLibRoot(parsed) ?: relativePath
         val flatEntries = flattenPreviewEntries(filterCleanedFiles(parsed), nxLibRoot, relativePath) + listOf(
-            PreviewEntry("CREATE", "$relativePath/src/lib/models/$kebab.model.ts"),
+            PreviewEntry("CREATE", "$relativePath/src/lib/$inputKebab/$inputKebab.model.ts"),
             PreviewEntry("UPDATE", "$relativePath/src/index.ts"),
         )
         if (!showTreePreview(project, flatEntries)) return
