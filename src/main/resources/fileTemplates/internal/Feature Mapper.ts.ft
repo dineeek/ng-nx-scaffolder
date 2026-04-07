@@ -6,7 +6,7 @@ import { type ${STORE_STATE_NAME} } from '../store/${STORE_NAME}.state'
 export class ${MAPPER_CLASS} {
 #if(${HAS_STORE} == "true")
   static fromExampleToStoreModel (example: IExample[]): ${STORE_STATE_NAME} {
-    return null
+    return {} as ${STORE_STATE_NAME}
   }
 #end
 }

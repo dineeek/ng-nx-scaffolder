@@ -60,7 +60,7 @@ class FeatureLibDialog : DialogWrapper(true) {
         row {
             checkBox("Publishable")
                 .bindSelected(::publishable)
-                .comment("Generates ng-package.json, package.json, tsconfig.lib.prod.json")
+                .comment("Allow library to be published to npm registry")
         }
         separator()
         row {
