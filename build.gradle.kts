@@ -112,6 +112,9 @@ intellijPlatform {
             url = "https://github.com/dineeek/ng-nx-scaffolder"
         }
     }
+    publishing {
+        token = providers.environmentVariable("PUBLISH_TOKEN")
+    }
 }
 
 detekt {
