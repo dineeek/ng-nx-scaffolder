@@ -1,12 +1,12 @@
 plugins {
     id("java")
     id("org.jetbrains.kotlin.jvm") version "2.0.21"
-    id("org.jetbrains.intellij.platform") version "2.2.1"
+    id("org.jetbrains.intellij.platform") version "2.11.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 group = "com.ngscaffolder"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
